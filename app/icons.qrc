@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file>icons/server-database.svg</file>
         <file>icons/configure.svg</file>
         <file>icons/multimedia-player.svg</file>
         <file>icons/network-connect.svg</file>
