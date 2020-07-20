@@ -122,7 +122,7 @@ void Controller::pollForStatus()
         while ((entity = mpd_recv_entity(m_connection)) != nullptr) {
             if (mpd_entity_get_type(entity) == MPD_ENTITY_TYPE_SONG) {
                 queue.append(
-                    new SongItem(QIcon(":/cicons/audio-x-generic.svg"),
+                    new SongItem(QIcon(":/icons/audio-x-generic.svg"),
                                  Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled,
                                  false,
                                  entity));

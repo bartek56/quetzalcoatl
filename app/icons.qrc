@@ -1,7 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/server-database.svg</file>
+        <file>icons/audio-x-generic.svg</file>
         <file>icons/configure.svg</file>
+        <file>icons/folder-favorites.svg</file>
         <file>icons/multimedia-player.svg</file>
         <file>icons/network-connect.svg</file>
         <file>icons/network-disconnect.svg</file>
@@ -15,5 +16,6 @@
         <file>icons/shuffle-24px.svg</file>
         <file>icons/remove_from_queue-24px.svg</file>
         <file>icons/save-24px.svg</file>
+        <file>icons/server-database.svg</file>
     </qresource>
 </RCC>
