@@ -1,6 +1,4 @@
 <RCC>
     <qresource prefix="/">
-        <file>cicons/folder-sound.svg</file>
-        <file>cicons/media-optical-audio.svg</file>
     </qresource>
 </RCC>
