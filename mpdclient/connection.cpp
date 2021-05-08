@@ -24,7 +24,7 @@ const unsigned *mpd::connection::get_server_version()
     return mpd_connection_get_server_version(m_connection);
 }
 
-bool mpd::connection::clearError()
+bool mpd::connection::clear_error()
 {
     return mpd_connection_clear_error(m_connection);
 }
@@ -63,12 +63,12 @@ mpd_idle mpd::connection::recv_idle(bool disable_timeout)
     return mpd_recv_idle(m_connection, disable_timeout);
 }
 
-std::unique_ptr<mpd::status> mpd::connection::status()
+std::unique_ptr<mpd::status> mpd::connection::run_status()
 {
     return std::make_unique<mpd::status>(mpd_run_status(m_connection));
 }
 
-std::vector<mpd::plchangeposid> mpd::connection::plchangesposid(unsigned version)
+std::vector<mpd::plchangeposid> mpd::connection::queue_changes_brief(unsigned version)
 {
     std::vector<mpd::plchangeposid> changes;
     if (mpd_send_queue_changes_brief(m_connection, version)) {
@@ -81,12 +81,12 @@ std::vector<mpd::plchangeposid> mpd::connection::plchangesposid(unsigned version
     return changes;
 }
 
-std::unique_ptr<mpd::song> mpd::connection::get_queue_song_id(unsigned id)
+std::unique_ptr<mpd::song> mpd::connection::run_get_queue_song_id(unsigned id)
 {
     return std::make_unique<mpd::song>(mpd_run_get_queue_song_id(m_connection, id));
 }
 
-mpd_idle mpd::connection::noidle()
+mpd_idle mpd::connection::run_noidle()
 {
     return mpd_run_noidle(m_connection);
 }
