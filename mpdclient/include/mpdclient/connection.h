@@ -34,6 +34,10 @@ public:
     virtual std::vector<plchangeposid> plchangesposid(unsigned);
     std::unique_ptr<mpd::Song> get_queue_song_id(unsigned);
     virtual mpd_idle noidle();
+    virtual bool search_db_songs(bool);
+    virtual bool search_add_tag_constraint(mpd_operator, mpd_tag_type, const char *);
+    virtual bool search_commit();
+    virtual std::vector<std::unique_ptr<Song>> recv_songs();
 
     Connection(const Connection &) = delete;
     Connection &operator=(const Connection &) = delete;

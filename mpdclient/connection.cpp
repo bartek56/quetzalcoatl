@@ -91,6 +91,32 @@ mpd_idle mpd::Connection::noidle()
     return mpd_run_noidle(m_connection);
 }
 
+bool mpd::Connection::search_db_songs(bool exact)
+{
+    return mpd_search_db_songs(m_connection, exact);
+}
+
+bool mpd::Connection::search_add_tag_constraint(mpd_operator oper,
+                                                mpd_tag_type type,
+                                                const char *value)
+{
+    return mpd_search_add_tag_constraint(m_connection, oper, type, value);
+}
+
+bool mpd::Connection::search_commit()
+{
+    return mpd_search_commit(m_connection);
+}
+
+std::vector<std::unique_ptr<mpd::Song>> mpd::Connection::recv_songs()
+{
+    std::vector<std::unique_ptr<mpd::Song>> songs;
+    while (mpd_song *song_ptr = mpd_recv_song(m_connection)) {
+        songs.push_back(std::make_unique<mpd::Song>(song_ptr));
+    }
+    return songs;
+}
+
 mpd::Connection::Connection(mpd::Connection &&other)
     : m_connection(other.m_connection)
 {
