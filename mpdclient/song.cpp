@@ -1,31 +1,31 @@
 #include "mpdclient/song.h"
 
-const char *mpd::Song::get_tag(mpd_tag_type type, unsigned idx)
+const char *mpd::song::get_tag(mpd_tag_type type, unsigned idx)
 {
     return mpd_song_get_tag(m_song, type, idx);
 }
 
-mpd::Song::operator bool()
+mpd::song::operator bool()
 {
     return m_song;
 }
 
-mpd::Song::Song(mpd_song *song)
+mpd::song::song(mpd_song *song)
     : m_song(song)
 {}
 
-mpd::Song::Song(mpd::Song &other)
+mpd::song::song(mpd::song &other)
 {
     m_song = other.m_song ? mpd_song_dup(other.m_song) : other.m_song;
 }
 
-mpd::Song::Song(mpd::Song &&other)
+mpd::song::song(mpd::song &&other)
 {
     m_song = other.m_song;
     other.m_song = nullptr;
 }
 
-mpd::Song &mpd::Song::operator=(const mpd::Song &other)
+mpd::song &mpd::song::operator=(const mpd::song &other)
 {
     if (this != &other) {
         m_song = other.m_song ? mpd_song_dup(other.m_song) : other.m_song;
@@ -33,14 +33,14 @@ mpd::Song &mpd::Song::operator=(const mpd::Song &other)
     return *this;
 }
 
-mpd::Song &mpd::Song::operator=(mpd::Song &&other)
+mpd::song &mpd::song::operator=(mpd::song &&other)
 {
     m_song = other.m_song;
     other.m_song = nullptr;
     return *this;
 }
 
-mpd::Song::~Song()
+mpd::song::~song()
 {
     if (m_song) {
         mpd_song_free(m_song);

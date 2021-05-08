@@ -5,18 +5,18 @@
 
 namespace mpd {
 
-class Song
+class song
 {
 public:
     virtual const char *get_tag(mpd_tag_type, unsigned);
 
     operator bool();
-    Song(mpd_song * = nullptr);
-    Song(Song &);
-    Song(Song &&);
-    Song &operator=(const Song &);
-    Song &operator=(Song &&);
-    virtual ~Song();
+    song(mpd_song * = nullptr);
+    song(song &);
+    song(song &&);
+    song &operator=(const song &);
+    song &operator=(song &&);
+    virtual ~song();
 
 private:
     mpd_song *m_song;

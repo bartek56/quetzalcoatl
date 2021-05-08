@@ -5,20 +5,20 @@
 
 namespace mpd {
 
-class Status
+class status
 {
 public:
-    Status(mpd_status * = nullptr);
+    status(mpd_status * = nullptr);
     virtual explicit operator bool();
 
     virtual unsigned get_queue_version();
     virtual unsigned get_queue_length();
 
-    Status(const Status &) = delete;
-    Status &operator=(const Status &) = delete;
-    Status(Status &&);
-    Status &operator=(Status &&);
-    virtual ~Status();
+    status(const status &) = delete;
+    status &operator=(const status &) = delete;
+    status(status &&);
+    status &operator=(status &&);
+    virtual ~status();
 
 private:
     mpd_status *m_status;
