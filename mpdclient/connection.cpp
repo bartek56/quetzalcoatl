@@ -103,16 +103,14 @@ bool mpd::Connection::search_add_tag_constraint(mpd_operator oper,
     return mpd_search_add_tag_constraint(m_connection, oper, type, value);
 }
 
-bool mpd::Connection::search_commit()
-{
-    return mpd_search_commit(m_connection);
-}
-
-std::vector<std::unique_ptr<mpd::Song>> mpd::Connection::recv_songs()
+std::vector<std::unique_ptr<mpd::Song>> mpd::Connection::search_commit()
 {
     std::vector<std::unique_ptr<mpd::Song>> songs;
-    while (mpd_song *song_ptr = mpd_recv_song(m_connection)) {
-        songs.push_back(std::make_unique<mpd::Song>(song_ptr));
+
+    if (mpd_search_commit(m_connection)) {
+        while (mpd_song *song_ptr = mpd_recv_song(m_connection)) {
+            songs.push_back(std::make_unique<mpd::Song>(song_ptr));
+        }
     }
     return songs;
 }
