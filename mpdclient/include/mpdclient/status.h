@@ -3,7 +3,7 @@
 
 #include <mpd/client.h>
 
-namespace mpd {
+namespace mpdclient {
 
 class status
 {
@@ -24,6 +24,6 @@ private:
     mpd_status *m_status{};
 };
 
-} // namespace mpd
+} // namespace mpdclient
 
 #endif

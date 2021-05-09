@@ -3,7 +3,7 @@
 
 #include <mpd/client.h>
 
-namespace mpd {
+namespace mpdclient {
 
 class song
 {
@@ -22,6 +22,6 @@ private:
     mpd_song *m_song{};
 };
 
-} // namespace mpd
+} // namespace mpdclient
 
 #endif

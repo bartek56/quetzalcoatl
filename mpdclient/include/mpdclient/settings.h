@@ -3,7 +3,7 @@
 
 #include <mpd/client.h>
 
-namespace mpd {
+namespace mpdclient {
 
 class settings
 {
@@ -25,5 +25,5 @@ private:
     mpd_settings *m_settings{};
 };
 
-}; // namespace mpd
+}; // namespace mpdclient
 #endif

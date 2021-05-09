@@ -1,41 +1,41 @@
 #include "mpdclient/settings.h"
 
-mpd::settings::settings(mpd_settings *settings_ptr)
+mpdclient::settings::settings(mpd_settings *settings_ptr)
     : m_settings(settings_ptr)
 {}
 
-mpd::settings::operator bool() const
+mpdclient::settings::operator bool() const
 {
     return m_settings;
 }
 
-const char *mpd::settings::get_host()
+const char *mpdclient::settings::get_host()
 {
     return mpd_settings_get_host(m_settings);
 }
 
-unsigned mpd::settings::get_port()
+unsigned mpdclient::settings::get_port()
 {
     return mpd_settings_get_port(m_settings);
 }
 
-unsigned mpd::settings::get_timeout_ms()
+unsigned mpdclient::settings::get_timeout_ms()
 {
     return mpd_settings_get_timeout_ms(m_settings);
 }
 
-const char *mpd::settings::get_password()
+const char *mpdclient::settings::get_password()
 {
     return mpd_settings_get_password(m_settings);
 }
 
-mpd::settings::settings(mpd::settings &&other)
+mpdclient::settings::settings(mpdclient::settings &&other)
     : m_settings(other.m_settings)
 {
     other.m_settings = nullptr;
 }
 
-mpd::settings &mpd::settings::operator=(mpd::settings &&other)
+mpdclient::settings &mpdclient::settings::operator=(mpdclient::settings &&other)
 {
     if (this != &other) {
         if (m_settings) {
@@ -48,7 +48,7 @@ mpd::settings &mpd::settings::operator=(mpd::settings &&other)
     return *this;
 }
 
-mpd::settings::~settings()
+mpdclient::settings::~settings()
 {
     if (m_settings) {
         mpd_settings_free(m_settings);

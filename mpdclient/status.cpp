@@ -1,31 +1,31 @@
 #include "mpdclient/status.h"
 
-mpd::status::status(mpd_status *status)
+mpdclient::status::status(mpd_status *status)
     : m_status{status}
 {}
 
-mpd::status::operator bool() const
+mpdclient::status::operator bool() const
 {
     return bool(m_status);
 }
 
-unsigned mpd::status::get_queue_version()
+unsigned mpdclient::status::get_queue_version()
 {
     return mpd_status_get_queue_version(m_status);
 }
 
-unsigned mpd::status::get_queue_length()
+unsigned mpdclient::status::get_queue_length()
 {
     return mpd_status_get_queue_length(m_status);
 }
 
-mpd::status::status(mpd::status &&other)
+mpdclient::status::status(mpdclient::status &&other)
     : m_status(other.m_status)
 {
     other.m_status = nullptr;
 }
 
-mpd::status &mpd::status::operator=(mpd::status &&other)
+mpdclient::status &mpdclient::status::operator=(mpdclient::status &&other)
 {
     if (this != &other) {
         if (m_status) {
@@ -38,7 +38,7 @@ mpd::status &mpd::status::operator=(mpd::status &&other)
     return *this;
 }
 
-mpd::status::~status()
+mpdclient::status::~status()
 {
     if (m_status) {
         mpd_status_free(m_status);

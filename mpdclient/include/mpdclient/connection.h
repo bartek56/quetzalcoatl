@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace mpd {
+namespace mpdclient {
 
 struct plchangeposid
 {
@@ -16,23 +16,23 @@ struct plchangeposid
     unsigned id;
 };
 
-class connection
+class mpd
 {
 public:
-    connection(mpd_connection * = nullptr);
+    mpd(mpd_connection * = nullptr);
     virtual explicit operator bool() const;
 
-    virtual mpd_error get_error();
-    virtual const char *get_error_message();
-    virtual const unsigned *get_server_version();
+    virtual mpd_error connection_get_error();
+    virtual const char *connection_get_error_message();
+    virtual const unsigned *connection_get_server_version();
     virtual bool clear_error();
     virtual std::vector<std::unique_ptr<song>> list_queue_meta();
-    virtual int get_fd();
+    virtual int connection_get_fd();
     virtual bool send_idle();
     virtual mpd_idle recv_idle(bool);
-    virtual std::unique_ptr<mpd::status> run_status();
+    virtual std::unique_ptr<mpdclient::status> run_status();
     virtual std::vector<plchangeposid> queue_changes_brief(unsigned);
-    std::unique_ptr<mpd::song> run_get_queue_song_id(unsigned);
+    std::unique_ptr<mpdclient::song> run_get_queue_song_id(unsigned);
     virtual mpd_idle run_noidle();
     virtual bool search_db_songs(bool);
     virtual bool search_add_tag_constraint(mpd_operator, mpd_tag_type, const char *);
@@ -41,16 +41,16 @@ public:
     virtual bool command_list_end();
     virtual bool send_move_id(unsigned, unsigned);
 
-    connection(const connection &) = delete;
-    connection &operator=(const connection &) = delete;
-    connection(connection &&);
-    connection &operator=(connection &&);
-    virtual ~connection();
+    mpd(const mpd &) = delete;
+    mpd &operator=(const mpd &) = delete;
+    mpd(mpd &&);
+    mpd &operator=(mpd &&);
+    virtual ~mpd();
 
 private:
     mpd_connection *m_connection{};
 };
 
-} // namespace mpd
+} // namespace mpdclient
 
 #endif
