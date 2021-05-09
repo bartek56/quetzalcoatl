@@ -1,5 +1,5 @@
-#ifndef connection_h
-#define connection_h
+#ifndef mpd_h
+#define mpd_h
 
 #include "entity.h"
 #include "playlist.h"
