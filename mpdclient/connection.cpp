@@ -40,6 +40,7 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta()
                 songs.push_back(
                     std::make_unique<mpdclient::song>(mpd_song_dup(mpd_entity_get_song(entity))));
             }
+            mpd_entity_free(entity);
         }
     }
     return songs;
