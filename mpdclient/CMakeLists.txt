@@ -1,5 +1,6 @@
 add_library(mpdclient SHARED
   connection.cpp
+  playlist.cpp
   song.cpp
   status.cpp
   settings.cpp
