@@ -56,6 +56,17 @@ std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_playlist_me
     return entities;
 }
 
+std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_all_meta(const char *path)
+{
+    std::vector<std::unique_ptr<mpdclient::entity>> entities;
+    if (mpd_send_list_all_meta(m_connection, path)) {
+        while (auto entity = mpd_recv_entity(m_connection)) {
+            entities.push_back(std::make_unique<mpdclient::entity>(entity));
+        }
+    }
+    return entities;
+}
+
 int mpdclient::mpd::connection_get_fd()
 {
     return mpd_connection_get_fd(m_connection);
