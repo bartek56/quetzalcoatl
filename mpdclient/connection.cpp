@@ -115,6 +115,21 @@ std::vector<std::unique_ptr<mpd::song>> mpd::connection::search_commit()
     return songs;
 }
 
+bool mpd::connection::command_list_begin(bool discrete_ok)
+{
+    return mpd_command_list_begin(m_connection, discrete_ok);
+}
+
+bool mpd::connection::command_list_end()
+{
+    return mpd_command_list_end(m_connection);
+}
+
+bool mpd::connection::send_move_id(unsigned from, unsigned to)
+{
+    return mpd_send_move_id(m_connection, from, to);
+}
+
 mpd::connection::connection(mpd::connection &&other)
     : m_connection(other.m_connection)
 {

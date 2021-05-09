@@ -37,6 +37,9 @@ public:
     virtual bool search_db_songs(bool);
     virtual bool search_add_tag_constraint(mpd_operator, mpd_tag_type, const char *);
     virtual std::vector<std::unique_ptr<song>> search_commit();
+    virtual bool command_list_begin(bool);
+    virtual bool command_list_end();
+    virtual bool send_move_id(unsigned, unsigned);
 
     connection(const connection &) = delete;
     connection &operator=(const connection &) = delete;
