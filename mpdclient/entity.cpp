@@ -14,6 +14,12 @@ mpd_entity_type mpdclient::entity::get_type()
     return mpd_entity_get_type(m_entity);
 }
 
+std::unique_ptr<mpdclient::directory> mpdclient::entity::get_directory()
+{
+    return std::make_unique<mpdclient::directory>(
+        mpd_directory_dup(mpd_entity_get_directory(m_entity)));
+}
+
 std::unique_ptr<mpdclient::song> mpdclient::entity::get_song()
 {
     return std::make_unique<mpdclient::song>(mpd_song_dup(mpd_entity_get_song(m_entity)));

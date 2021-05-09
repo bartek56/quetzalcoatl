@@ -1,6 +1,7 @@
 #ifndef connection_h
 #define connection_h
 
+#include "entity.h"
 #include "playlist.h"
 #include "song.h"
 #include "status.h"
@@ -27,8 +28,8 @@ public:
     virtual const char *connection_get_error_message();
     virtual const unsigned *connection_get_server_version();
     virtual bool clear_error();
-    virtual std::vector<std::unique_ptr<song>> list_queue_meta();
-    virtual std::vector<std::unique_ptr<song>> list_playlist_meta(const char *);
+    virtual std::vector<std::unique_ptr<entity>> list_queue_meta();
+    virtual std::vector<std::unique_ptr<entity>> list_playlist_meta(const char *);
     virtual int connection_get_fd();
     virtual bool send_idle();
     virtual mpd_idle recv_idle(bool);

@@ -29,39 +29,31 @@ bool mpdclient::mpd::clear_error()
     return mpd_connection_clear_error(m_connection);
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta()
+std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_queue_meta()
 {
     // Precondition: m_connection is not null
 
-    std::vector<std::unique_ptr<mpdclient::song>> songs;
+    std::vector<std::unique_ptr<mpdclient::entity>> entities;
     if (mpd_send_list_queue_meta(m_connection)) {
         while (auto entity = mpd_recv_entity(m_connection)) {
-            if (mpd_entity_get_type(entity) == MPD_ENTITY_TYPE_SONG) {
-                songs.push_back(
-                    std::make_unique<mpdclient::song>(mpd_song_dup(mpd_entity_get_song(entity))));
-            }
-            mpd_entity_free(entity);
+            entities.push_back(std::make_unique<mpdclient::entity>(entity));
         }
     }
-    return songs;
+    return entities;
 
     // Postcondition: getError() will have the success or failure status. The vector will be
     // empty if there was a problem.
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_playlist_meta(const char *name)
+std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_playlist_meta(const char *name)
 {
-    std::vector<std::unique_ptr<mpdclient::song>> songs;
+    std::vector<std::unique_ptr<mpdclient::entity>> entities;
     if (mpd_send_list_playlist_meta(m_connection, name)) {
         while (auto entity = mpd_recv_entity(m_connection)) {
-            if (mpd_entity_get_type(entity) == MPD_ENTITY_TYPE_SONG) {
-                songs.push_back(
-                    std::make_unique<mpdclient::song>(mpd_song_dup(mpd_entity_get_song(entity))));
-            }
-            mpd_entity_free(entity);
+            entities.push_back(std::make_unique<mpdclient::entity>(entity));
         }
     }
-    return songs;
+    return entities;
 }
 
 int mpdclient::mpd::connection_get_fd()
