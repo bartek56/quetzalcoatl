@@ -45,7 +45,7 @@ public:
     virtual ~connection();
 
 private:
-    mpd_connection *m_connection;
+    mpd_connection *m_connection{};
 };
 
 } // namespace mpd

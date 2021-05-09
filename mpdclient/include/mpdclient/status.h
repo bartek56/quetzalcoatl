@@ -21,7 +21,7 @@ public:
     virtual ~status();
 
 private:
-    mpd_status *m_status;
+    mpd_status *m_status{};
 };
 
 } // namespace mpd

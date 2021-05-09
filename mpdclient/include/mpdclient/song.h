@@ -19,7 +19,7 @@ public:
     virtual ~song();
 
 private:
-    mpd_song *m_song;
+    mpd_song *m_song{};
 };
 
 } // namespace mpd
