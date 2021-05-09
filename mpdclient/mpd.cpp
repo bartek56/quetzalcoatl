@@ -1,4 +1,4 @@
-#include "mpdclient/connection.h"
+#include "mpdclient/mpd.h"
 
 mpdclient::mpd::mpd(mpd_connection *connection)
     : m_connection{connection}
@@ -35,8 +35,10 @@ std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_queue_meta(
 
     std::vector<std::unique_ptr<mpdclient::entity>> entities;
     if (mpd_send_list_queue_meta(m_connection)) {
-        while (auto entity = mpd_recv_entity(m_connection)) {
-            entities.push_back(std::make_unique<mpdclient::entity>(entity));
+        while (auto entity = std::make_unique<mpdclient::entity>(mpd_recv_entity(m_connection))) {
+            if (entity->get_type() == MPD_ENTITY_TYPE_SONG) {
+                entities.push_back(std::move(entity));
+            }
         }
     }
     return entities;
