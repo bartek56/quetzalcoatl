@@ -31,6 +31,7 @@ public:
     virtual std::vector<std::unique_ptr<entity>> list_queue_meta();
     virtual std::vector<std::unique_ptr<entity>> list_playlist_meta(const char *);
     virtual std::vector<std::unique_ptr<entity>> list_all_meta(const char *);
+    virtual std::vector<std::unique_ptr<entity>> list_meta(const char *);
     virtual int connection_get_fd();
     virtual bool send_idle();
     virtual mpd_idle recv_idle(bool);
