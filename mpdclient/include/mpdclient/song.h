@@ -10,7 +10,7 @@ class song
 public:
     virtual const char *get_tag(mpd_tag_type, unsigned);
 
-    operator bool();
+    virtual explicit operator bool() const;
     song(mpd_song * = nullptr);
     song(song &);
     song(song &&);

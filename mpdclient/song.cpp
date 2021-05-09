@@ -5,7 +5,7 @@ const char *mpd::song::get_tag(mpd_tag_type type, unsigned idx)
     return mpd_song_get_tag(m_song, type, idx);
 }
 
-mpd::song::operator bool()
+mpd::song::operator bool() const
 {
     return m_song;
 }

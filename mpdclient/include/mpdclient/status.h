@@ -9,7 +9,7 @@ class status
 {
 public:
     status(mpd_status * = nullptr);
-    virtual explicit operator bool();
+    virtual explicit operator bool() const;
 
     virtual unsigned get_queue_version();
     virtual unsigned get_queue_length();

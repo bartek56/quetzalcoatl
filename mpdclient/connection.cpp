@@ -4,7 +4,7 @@ mpd::connection::connection(mpd_connection *connection)
     : m_connection{connection}
 {}
 
-mpd::connection::operator bool()
+mpd::connection::operator bool() const
 {
     return bool(m_connection);
 }

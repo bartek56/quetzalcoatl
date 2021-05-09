@@ -9,7 +9,7 @@ class settings
 {
 public:
     settings(mpd_settings * = nullptr);
-    explicit operator bool() const;
+    virtual explicit operator bool() const;
     virtual const char *get_host();
     virtual unsigned get_port();
     virtual unsigned get_timeout_ms();

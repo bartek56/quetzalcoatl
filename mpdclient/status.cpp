@@ -4,7 +4,7 @@ mpd::status::status(mpd_status *status)
     : m_status{status}
 {}
 
-mpd::status::operator bool()
+mpd::status::operator bool() const
 {
     return bool(m_status);
 }

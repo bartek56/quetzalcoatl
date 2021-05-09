@@ -20,7 +20,7 @@ class connection
 {
 public:
     connection(mpd_connection * = nullptr);
-    virtual explicit operator bool();
+    virtual explicit operator bool() const;
 
     virtual mpd_error get_error();
     virtual const char *get_error_message();
