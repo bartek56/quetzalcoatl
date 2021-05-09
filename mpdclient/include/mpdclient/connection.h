@@ -1,6 +1,7 @@
 #ifndef connection_h
 #define connection_h
 
+#include "playlist.h"
 #include "song.h"
 #include "status.h"
 #include <memory>
@@ -40,6 +41,7 @@ public:
     virtual bool command_list_begin(bool);
     virtual bool command_list_end();
     virtual bool send_move_id(unsigned, unsigned);
+    virtual std::vector<std::unique_ptr<mpdclient::playlist>> list_playlists();
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;

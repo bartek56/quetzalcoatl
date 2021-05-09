@@ -130,6 +130,17 @@ bool mpdclient::mpd::send_move_id(unsigned from, unsigned to)
     return mpd_send_move_id(m_connection, from, to);
 }
 
+std::vector<std::unique_ptr<mpdclient::playlist>> mpdclient::mpd::list_playlists()
+{
+    std::vector<std::unique_ptr<mpdclient::playlist>> playlists;
+    if (mpd_send_list_playlists(m_connection)) {
+        while (mpd_playlist *playlist = mpd_recv_playlist(m_connection)) {
+            playlists.push_back(std::make_unique<mpdclient::playlist>(playlist));
+        }
+    }
+    return playlists;
+}
+
 mpdclient::mpd::mpd(mpdclient::mpd &&other)
     : m_connection(other.m_connection)
 {
