@@ -35,10 +35,9 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta()
 
     std::vector<std::unique_ptr<mpdclient::song>> songs;
     if (mpd_send_list_queue_meta(m_connection)) {
-        while (auto entity = mpd_recv_entity(m_connection)) {
-            auto entity_ptr = std::make_unique<mpdclient::entity>(entity);
-            if (entity_ptr->get_type() == MPD_ENTITY_TYPE_SONG) {
-                songs.push_back(entity_ptr->get_song());
+        while (auto entity = mpdclient::entity(mpd_recv_entity(m_connection))) {
+            if (entity.get_type() == MPD_ENTITY_TYPE_SONG) {
+                songs.push_back(entity.get_song());
             }
         }
     }
@@ -52,10 +51,9 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_playlist_meta
 {
     std::vector<std::unique_ptr<mpdclient::song>> songs;
     if (mpd_send_list_playlist_meta(m_connection, name)) {
-        while (auto entity = mpd_recv_entity(m_connection)) {
-            auto entity_ptr = std::make_unique<mpdclient::entity>(entity);
-            if (entity_ptr->get_type() == MPD_ENTITY_TYPE_SONG) {
-                songs.push_back(entity_ptr->get_song());
+        while (auto entity = mpdclient::entity(mpd_recv_entity(m_connection))) {
+            if (entity.get_type() == MPD_ENTITY_TYPE_SONG) {
+                songs.push_back(entity.get_song());
             }
         }
     }
