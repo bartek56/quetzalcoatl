@@ -28,6 +28,7 @@ public:
     virtual const unsigned *connection_get_server_version();
     virtual bool clear_error();
     virtual std::vector<std::unique_ptr<song>> list_queue_meta();
+    virtual std::vector<std::unique_ptr<song>> list_playlist_meta(const char *);
     virtual int connection_get_fd();
     virtual bool send_idle();
     virtual mpd_idle recv_idle(bool);
