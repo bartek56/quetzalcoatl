@@ -2,6 +2,7 @@ add_library(mpdclient SHARED
   connection.cpp
   song.cpp
   status.cpp
+  settings.cpp
 )
 
 target_include_directories(mpdclient PRIVATE ${LIBMPDCLIENT_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include)
