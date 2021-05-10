@@ -180,6 +180,11 @@ bool mpdclient::mpd::send_add_id_to(const char *uri, unsigned to)
     return mpd_send_add_id_to(m_connection, uri, to);
 }
 
+bool mpdclient::mpd::response_finish()
+{
+    return mpd_response_finish(m_connection);
+}
+
 mpdclient::mpd::mpd(mpdclient::mpd &&other)
     : m_connection(other.m_connection)
 {
