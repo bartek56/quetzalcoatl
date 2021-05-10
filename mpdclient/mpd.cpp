@@ -175,6 +175,11 @@ std::vector<std::unique_ptr<mpdclient::playlist>> mpdclient::mpd::list_playlists
     return playlists;
 }
 
+bool mpdclient::mpd::send_add_id_to(const char *uri, unsigned to)
+{
+    return mpd_send_add_id_to(m_connection, uri, to);
+}
+
 mpdclient::mpd::mpd(mpdclient::mpd &&other)
     : m_connection(other.m_connection)
 {

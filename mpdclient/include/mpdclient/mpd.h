@@ -46,6 +46,7 @@ public:
     virtual bool command_list_end();
     virtual bool send_move_id(unsigned, unsigned);
     virtual std::vector<std::unique_ptr<mpdclient::playlist>> list_playlists();
+    virtual bool send_add_id_to(const char *, unsigned);
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
