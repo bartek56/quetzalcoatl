@@ -13,6 +13,14 @@ public:
 
     virtual unsigned get_queue_version();
     virtual unsigned get_queue_length();
+    virtual unsigned get_total_time();
+    virtual unsigned get_elapsed_ms();
+    virtual bool get_random();
+    virtual bool get_repeat();
+    virtual int get_volume();
+    virtual unsigned get_crossfade();
+    virtual mpd_state get_state();
+    virtual int get_song_id();
 
     status(const status &) = delete;
     status &operator=(const status &) = delete;

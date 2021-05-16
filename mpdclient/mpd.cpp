@@ -137,16 +137,24 @@ bool mpdclient::mpd::search_add_tag_constraint(mpd_operator oper,
     return mpd_search_add_tag_constraint(m_connection, oper, type, value);
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::search_commit()
+std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::recv_songs()
 {
     std::vector<std::unique_ptr<mpdclient::song>> songs;
 
-    if (mpd_search_commit(m_connection)) {
-        while (mpd_song *song_ptr = mpd_recv_song(m_connection)) {
-            songs.push_back(std::make_unique<mpdclient::song>(song_ptr));
-        }
+    while (mpd_song *song_ptr = mpd_recv_song(m_connection)) {
+        songs.push_back(std::make_unique<mpdclient::song>(song_ptr));
     }
     return songs;
+}
+
+bool mpdclient::mpd::search_commit()
+{
+    return mpd_search_commit(m_connection);
+}
+
+bool mpdclient::mpd::search_db_tags(mpd_tag_type type)
+{
+    return mpd_search_db_tags(m_connection, type);
 }
 
 bool mpdclient::mpd::command_list_begin(bool discrete_ok)
@@ -183,6 +191,19 @@ bool mpdclient::mpd::send_add_id_to(const char *uri, unsigned to)
 bool mpdclient::mpd::response_finish()
 {
     return mpd_response_finish(m_connection);
+}
+
+std::vector<mpdclient::pair> mpdclient::mpd::recv_pair_tags(mpd_tag_type type)
+{
+    std::vector<mpdclient::pair> pairs;
+    while (mpd_pair *mpdpair = mpd_recv_pair_tag(m_connection, type)) {
+        mpdclient::pair pair;
+        pair.name = mpdpair->name;
+        pair.value = mpdpair->value;
+        mpd_return_pair(m_connection, mpdpair);
+        pairs.push_back(pair);
+    }
+    return pairs;
 }
 
 mpdclient::mpd::mpd(mpdclient::mpd &&other)

@@ -7,6 +7,7 @@
 #include "status.h"
 #include <memory>
 #include <mpd/client.h>
+#include <string.h>
 #include <utility>
 #include <vector>
 
@@ -16,6 +17,12 @@ struct plchangeposid
 {
     unsigned position;
     unsigned id;
+};
+
+struct pair
+{
+    std::string name;
+    std::string value;
 };
 
 class mpd
@@ -41,13 +48,16 @@ public:
     virtual mpd_idle run_noidle();
     virtual bool search_db_songs(bool);
     virtual bool search_add_tag_constraint(mpd_operator, mpd_tag_type, const char *);
-    virtual std::vector<std::unique_ptr<song>> search_commit();
+    virtual bool search_commit();
+    virtual bool search_db_tags(mpd_tag_type);
+    virtual std::vector<std::unique_ptr<song>> recv_songs();
     virtual bool command_list_begin(bool);
     virtual bool command_list_end();
     virtual bool send_move_id(unsigned, unsigned);
     virtual std::vector<std::unique_ptr<mpdclient::playlist>> list_playlists();
     virtual bool send_add_id_to(const char *, unsigned);
     virtual bool response_finish();
+    virtual std::vector<mpdclient::pair> recv_pair_tags(mpd_tag_type);
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
