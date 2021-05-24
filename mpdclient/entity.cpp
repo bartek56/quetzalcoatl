@@ -9,23 +9,23 @@ mpdclient::entity::operator bool() const
     return m_entity;
 }
 
-mpd_entity_type mpdclient::entity::get_type()
+mpd_entity_type mpdclient::entity::get_type() noexcept
 {
     return mpd_entity_get_type(m_entity);
 }
 
-std::unique_ptr<mpdclient::directory> mpdclient::entity::get_directory()
+std::unique_ptr<mpdclient::directory> mpdclient::entity::get_directory() noexcept
 {
     return std::make_unique<mpdclient::directory>(
         mpd_directory_dup(mpd_entity_get_directory(m_entity)));
 }
 
-std::unique_ptr<mpdclient::song> mpdclient::entity::get_song()
+std::unique_ptr<mpdclient::song> mpdclient::entity::get_song() noexcept
 {
     return std::make_unique<mpdclient::song>(mpd_song_dup(mpd_entity_get_song(m_entity)));
 }
 
-std::unique_ptr<mpdclient::playlist> mpdclient::entity::get_playlist()
+std::unique_ptr<mpdclient::playlist> mpdclient::entity::get_playlist() noexcept
 {
     return std::make_unique<mpdclient::playlist>(
         mpd_playlist_dup(mpd_entity_get_playlist(m_entity)));

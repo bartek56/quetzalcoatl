@@ -8,7 +8,7 @@ namespace mpdclient {
 class directory
 {
 public:
-    virtual const char *get_path();
+    virtual const char *get_path() noexcept;
 
     virtual explicit operator bool() const;
     directory(mpd_directory * = nullptr);

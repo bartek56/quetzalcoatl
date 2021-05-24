@@ -1,6 +1,6 @@
 #include "mpdclient/directory.h"
 
-const char *mpdclient::directory::get_path()
+const char *mpdclient::directory::get_path() noexcept
 {
     return mpd_directory_get_path(m_directory);
 }

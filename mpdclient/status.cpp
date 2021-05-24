@@ -9,52 +9,52 @@ mpdclient::status::operator bool() const
     return bool(m_status);
 }
 
-unsigned mpdclient::status::get_queue_version()
+unsigned mpdclient::status::get_queue_version() noexcept
 {
     return mpd_status_get_queue_version(m_status);
 }
 
-unsigned mpdclient::status::get_queue_length()
+unsigned mpdclient::status::get_queue_length() noexcept
 {
     return mpd_status_get_queue_length(m_status);
 }
 
-unsigned mpdclient::status::get_total_time()
+unsigned mpdclient::status::get_total_time() noexcept
 {
     return mpd_status_get_total_time(m_status);
 }
 
-unsigned mpdclient::status::get_elapsed_ms()
+unsigned mpdclient::status::get_elapsed_ms() noexcept
 {
     return mpd_status_get_elapsed_ms(m_status);
 }
 
-bool mpdclient::status::get_random()
+bool mpdclient::status::get_random() noexcept
 {
     return mpd_status_get_random(m_status);
 }
 
-bool mpdclient::status::get_repeat()
+bool mpdclient::status::get_repeat() noexcept
 {
     return mpd_status_get_repeat(m_status);
 }
 
-int mpdclient::status::get_volume()
+int mpdclient::status::get_volume() noexcept
 {
     return mpd_status_get_volume(m_status);
 }
 
-mpd_state mpdclient::status::get_state()
+mpd_state mpdclient::status::get_state() noexcept
 {
     return mpd_status_get_state(m_status);
 }
 
-unsigned mpdclient::status::get_crossfade()
+unsigned mpdclient::status::get_crossfade() noexcept
 {
     return mpd_status_get_crossfade(m_status);
 }
 
-int mpdclient::status::get_song_id()
+int mpdclient::status::get_song_id() noexcept
 {
     return mpd_status_get_song_id(m_status);
 }

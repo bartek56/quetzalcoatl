@@ -1,4 +1,5 @@
 #include "mpdclient/mpd.h"
+#include <string>
 
 mpdclient::mpd::mpd(mpd_connection *connection)
     : m_connection{connection}
@@ -9,27 +10,27 @@ mpdclient::mpd::operator bool() const
     return bool(m_connection);
 }
 
-mpd_error mpdclient::mpd::connection_get_error()
+mpd_error mpdclient::mpd::connection_get_error() noexcept
 {
     return mpd_connection_get_error(m_connection);
 };
 
-const char *mpdclient::mpd::connection_get_error_message()
+const char *mpdclient::mpd::connection_get_error_message() noexcept
 {
     return mpd_connection_get_error_message(m_connection);
 }
 
-const unsigned *mpdclient::mpd::connection_get_server_version()
+const unsigned *mpdclient::mpd::connection_get_server_version() noexcept
 {
     return mpd_connection_get_server_version(m_connection);
 }
 
-bool mpdclient::mpd::clear_error()
+bool mpdclient::mpd::clear_error() noexcept
 {
     return mpd_connection_clear_error(m_connection);
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta()
+std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta() noexcept
 {
     // Precondition: m_connection is not null
 
@@ -47,7 +48,8 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta()
     // empty if there was a problem.
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_playlist_meta(const char *name)
+std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_playlist_meta(
+    const char *name) noexcept
 {
     std::vector<std::unique_ptr<mpdclient::song>> songs;
     if (mpd_send_list_playlist_meta(m_connection, name)) {
@@ -60,7 +62,8 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_playlist_meta
     return songs;
 }
 
-std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_all_meta(const char *path)
+std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_all_meta(
+    const char *path) noexcept
 {
     std::vector<std::unique_ptr<mpdclient::entity>> entities;
     if (mpd_send_list_all_meta(m_connection, path)) {
@@ -71,7 +74,7 @@ std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_all_meta(co
     return entities;
 }
 
-std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_meta(const char *path)
+std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_meta(const char *path) noexcept
 {
     std::vector<std::unique_ptr<mpdclient::entity>> entities;
     if (mpd_send_list_meta(m_connection, path)) {
@@ -82,27 +85,27 @@ std::vector<std::unique_ptr<mpdclient::entity>> mpdclient::mpd::list_meta(const 
     return entities;
 }
 
-int mpdclient::mpd::connection_get_fd()
+int mpdclient::mpd::connection_get_fd() noexcept
 {
     return mpd_connection_get_fd(m_connection);
 }
 
-bool mpdclient::mpd::send_idle()
+bool mpdclient::mpd::send_idle() noexcept
 {
     return mpd_send_idle(m_connection);
 }
 
-mpd_idle mpdclient::mpd::recv_idle(bool disable_timeout)
+mpd_idle mpdclient::mpd::recv_idle(bool disable_timeout) noexcept
 {
     return mpd_recv_idle(m_connection, disable_timeout);
 }
 
-std::unique_ptr<mpdclient::status> mpdclient::mpd::run_status()
+std::unique_ptr<mpdclient::status> mpdclient::mpd::run_status() noexcept
 {
     return std::make_unique<mpdclient::status>(mpd_run_status(m_connection));
 }
 
-std::vector<mpdclient::plchangeposid> mpdclient::mpd::queue_changes_brief(unsigned version)
+std::vector<mpdclient::plchangeposid> mpdclient::mpd::queue_changes_brief(unsigned version) noexcept
 {
     std::vector<mpdclient::plchangeposid> changes;
     if (mpd_send_queue_changes_brief(m_connection, version)) {
@@ -115,29 +118,29 @@ std::vector<mpdclient::plchangeposid> mpdclient::mpd::queue_changes_brief(unsign
     return changes;
 }
 
-std::unique_ptr<mpdclient::song> mpdclient::mpd::run_get_queue_song_id(unsigned id)
+std::unique_ptr<mpdclient::song> mpdclient::mpd::run_get_queue_song_id(unsigned id) noexcept
 {
     return std::make_unique<mpdclient::song>(mpd_run_get_queue_song_id(m_connection, id));
 }
 
-mpd_idle mpdclient::mpd::run_noidle()
+mpd_idle mpdclient::mpd::run_noidle() noexcept
 {
     return mpd_run_noidle(m_connection);
 }
 
-bool mpdclient::mpd::search_db_songs(bool exact)
+bool mpdclient::mpd::search_db_songs(bool exact) noexcept
 {
     return mpd_search_db_songs(m_connection, exact);
 }
 
 bool mpdclient::mpd::search_add_tag_constraint(mpd_operator oper,
                                                mpd_tag_type type,
-                                               const char *value)
+                                               const char *value) noexcept
 {
     return mpd_search_add_tag_constraint(m_connection, oper, type, value);
 }
 
-std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::recv_songs()
+std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::recv_songs() noexcept
 {
     std::vector<std::unique_ptr<mpdclient::song>> songs;
 
@@ -147,32 +150,32 @@ std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::recv_songs()
     return songs;
 }
 
-bool mpdclient::mpd::search_commit()
+bool mpdclient::mpd::search_commit() noexcept
 {
     return mpd_search_commit(m_connection);
 }
 
-bool mpdclient::mpd::search_db_tags(mpd_tag_type type)
+bool mpdclient::mpd::search_db_tags(mpd_tag_type type) noexcept
 {
     return mpd_search_db_tags(m_connection, type);
 }
 
-bool mpdclient::mpd::command_list_begin(bool discrete_ok)
+bool mpdclient::mpd::command_list_begin(bool discrete_ok) noexcept
 {
     return mpd_command_list_begin(m_connection, discrete_ok);
 }
 
-bool mpdclient::mpd::command_list_end()
+bool mpdclient::mpd::command_list_end() noexcept
 {
     return mpd_command_list_end(m_connection);
 }
 
-bool mpdclient::mpd::send_move_id(unsigned from, unsigned to)
+bool mpdclient::mpd::send_move_id(unsigned from, unsigned to) noexcept
 {
     return mpd_send_move_id(m_connection, from, to);
 }
 
-std::vector<std::unique_ptr<mpdclient::playlist>> mpdclient::mpd::list_playlists()
+std::vector<std::unique_ptr<mpdclient::playlist>> mpdclient::mpd::list_playlists() noexcept
 {
     std::vector<std::unique_ptr<mpdclient::playlist>> playlists;
     if (mpd_send_list_playlists(m_connection)) {
@@ -183,27 +186,25 @@ std::vector<std::unique_ptr<mpdclient::playlist>> mpdclient::mpd::list_playlists
     return playlists;
 }
 
-bool mpdclient::mpd::send_add_id_to(const char *uri, unsigned to)
+bool mpdclient::mpd::send_add_id_to(const char *uri, unsigned to) noexcept
 {
     return mpd_send_add_id_to(m_connection, uri, to);
 }
 
-bool mpdclient::mpd::response_finish()
+bool mpdclient::mpd::response_finish() noexcept
 {
     return mpd_response_finish(m_connection);
 }
 
-std::vector<mpdclient::pair> mpdclient::mpd::recv_pair_tags(mpd_tag_type type)
+std::vector<std::string> mpdclient::mpd::recv_tags(mpd_tag_type type) noexcept
 {
-    std::vector<mpdclient::pair> pairs;
-    while (mpd_pair *mpdpair = mpd_recv_pair_tag(m_connection, type)) {
-        mpdclient::pair pair;
-        pair.name = mpdpair->name;
-        pair.value = mpdpair->value;
-        mpd_return_pair(m_connection, mpdpair);
-        pairs.push_back(pair);
+    std::vector<std::string> tags;
+    while (mpd_pair *pair = mpd_recv_pair_tag(m_connection, type)) {
+        // There is no use case where I will ever find pair->name useful.
+        tags.push_back(std::string(pair->value));
+        mpd_return_pair(m_connection, pair);
     }
-    return pairs;
+    return tags;
 }
 
 mpdclient::mpd::mpd(mpdclient::mpd &&other)

@@ -10,10 +10,11 @@ class settings
 public:
     settings(mpd_settings * = nullptr);
     virtual explicit operator bool() const;
-    virtual const char *get_host();
-    virtual unsigned get_port();
-    virtual unsigned get_timeout_ms();
-    virtual const char *get_password();
+
+    virtual const char *get_host() noexcept;
+    virtual unsigned get_port() noexcept;
+    virtual unsigned get_timeout_ms() noexcept;
+    virtual const char *get_password() noexcept;
 
     settings(const settings &) = delete;
     settings &operator=(const settings &) = delete;

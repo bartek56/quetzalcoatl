@@ -9,22 +9,22 @@ mpdclient::settings::operator bool() const
     return m_settings;
 }
 
-const char *mpdclient::settings::get_host()
+const char *mpdclient::settings::get_host() noexcept
 {
     return mpd_settings_get_host(m_settings);
 }
 
-unsigned mpdclient::settings::get_port()
+unsigned mpdclient::settings::get_port() noexcept
 {
     return mpd_settings_get_port(m_settings);
 }
 
-unsigned mpdclient::settings::get_timeout_ms()
+unsigned mpdclient::settings::get_timeout_ms() noexcept
 {
     return mpd_settings_get_timeout_ms(m_settings);
 }
 
-const char *mpdclient::settings::get_password()
+const char *mpdclient::settings::get_password() noexcept
 {
     return mpd_settings_get_password(m_settings);
 }

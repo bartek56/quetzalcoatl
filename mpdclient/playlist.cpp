@@ -1,6 +1,6 @@
 #include "mpdclient/playlist.h"
 
-const char *mpdclient::playlist::get_path()
+const char *mpdclient::playlist::get_path() noexcept
 {
     return mpd_playlist_get_path(m_playlist);
 }

@@ -13,10 +13,11 @@ class entity
 public:
     entity(mpd_entity * = nullptr);
     virtual explicit operator bool() const;
-    mpd_entity_type get_type();
-    std::unique_ptr<mpdclient::directory> get_directory();
-    std::unique_ptr<mpdclient::song> get_song();
-    std::unique_ptr<mpdclient::playlist> get_playlist();
+
+    mpd_entity_type get_type() noexcept;
+    std::unique_ptr<mpdclient::directory> get_directory() noexcept;
+    std::unique_ptr<mpdclient::song> get_song() noexcept;
+    std::unique_ptr<mpdclient::playlist> get_playlist() noexcept;
 
     entity(const entity &) = delete;
     entity &operator=(const entity &) = delete;

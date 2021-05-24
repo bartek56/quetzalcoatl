@@ -1,6 +1,6 @@
 #include "mpdclient/song.h"
 
-const char *mpdclient::song::get_tag(mpd_tag_type type, unsigned idx)
+const char *mpdclient::song::get_tag(mpd_tag_type type, unsigned idx) noexcept
 {
     return mpd_song_get_tag(m_song, type, idx);
 }
