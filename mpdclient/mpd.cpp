@@ -212,6 +212,11 @@ bool mpdclient::mpd::run_play_id(unsigned song_id) noexcept
     return mpd_run_play_id(m_connection, song_id);
 }
 
+int mpdclient::mpd::run_add_id(const char *file) noexcept
+{
+    return mpd_run_add_id(m_connection, file);
+}
+
 mpdclient::mpd::mpd(mpdclient::mpd &&other)
     : m_connection(other.m_connection)
 {
