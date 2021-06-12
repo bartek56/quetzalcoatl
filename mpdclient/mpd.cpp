@@ -65,6 +65,61 @@ bool mpdclient::mpd::run_stop() noexcept
     return mpd_run_stop(m_connection);
 }
 
+bool mpdclient::mpd::run_play() noexcept
+{
+    return mpd_run_play(m_connection);
+}
+
+bool mpdclient::mpd::run_toggle_pause() noexcept
+{
+    return mpd_run_toggle_pause(m_connection);
+}
+
+bool mpdclient::mpd::run_next() noexcept
+{
+    return mpd_run_next(m_connection);
+}
+
+bool mpdclient::mpd::run_previous() noexcept
+{
+    return mpd_run_previous(m_connection);
+}
+
+bool mpdclient::mpd::run_random(bool mode) noexcept
+{
+    return mpd_run_random(m_connection, mode);
+}
+
+bool mpdclient::mpd::run_repeat(bool mode) noexcept
+{
+    return mpd_run_repeat(m_connection, mode);
+}
+
+bool mpdclient::mpd::send_delete_id(unsigned id) noexcept
+{
+    return mpd_send_delete_id(m_connection, id);
+}
+
+bool mpdclient::mpd::run_seek_id(unsigned song_id, unsigned t) noexcept
+{
+    return mpd_run_seek_id(m_connection, song_id, t);
+}
+
+bool mpdclient::mpd::run_password(const char *password) noexcept
+{
+    return mpd_run_password(m_connection, password);
+}
+
+bool mpdclient::mpd::run_crossfade(unsigned seconds) noexcept
+{
+    return mpd_run_crossfade(m_connection, seconds);
+}
+
+bool mpdclient::mpd::run_set_volume(unsigned volume) noexcept
+{
+    return mpd_run_set_volume(m_connection, volume);
+}
+
 std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta() noexcept
 {
     // Precondition: m_connection is not null

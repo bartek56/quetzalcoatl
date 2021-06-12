@@ -61,6 +61,17 @@ public:
     virtual bool run_save(const char *) noexcept;
     virtual bool run_rm(const char *) noexcept;
     virtual bool run_stop() noexcept;
+    virtual bool run_play() noexcept;
+    virtual bool run_toggle_pause() noexcept;
+    virtual bool run_next() noexcept;
+    virtual bool run_previous() noexcept;
+    virtual bool run_random(bool) noexcept;
+    virtual bool run_repeat(bool) noexcept;
+    virtual bool send_delete_id(unsigned) noexcept;
+    virtual bool run_seek_id(unsigned, unsigned) noexcept;
+    virtual bool run_password(const char *) noexcept;
+    virtual bool run_crossfade(unsigned) noexcept;
+    virtual bool run_set_volume(unsigned) noexcept;
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
