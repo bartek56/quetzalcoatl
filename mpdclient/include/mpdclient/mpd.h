@@ -58,6 +58,7 @@ public:
     virtual bool send_add(const char *) noexcept;
     virtual bool send_play_pos(unsigned) noexcept;
     virtual bool run_rename(const char *, const char *) noexcept;
+    virtual bool run_save(const char *);
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
