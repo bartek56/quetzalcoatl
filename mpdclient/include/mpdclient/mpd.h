@@ -52,6 +52,7 @@ public:
     virtual bool send_add_id_to(const char *, unsigned) noexcept;
     virtual bool response_finish() noexcept;
     virtual std::vector<std::string> recv_tags(mpd_tag_type) noexcept;
+    virtual bool run_play_id(unsigned) noexcept;
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;

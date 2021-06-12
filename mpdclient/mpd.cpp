@@ -207,6 +207,11 @@ std::vector<std::string> mpdclient::mpd::recv_tags(mpd_tag_type type) noexcept
     return tags;
 }
 
+bool mpdclient::mpd::run_play_id(unsigned song_id) noexcept
+{
+    return mpd_run_play_id(m_connection, song_id);
+}
+
 mpdclient::mpd::mpd(mpdclient::mpd &&other)
     : m_connection(other.m_connection)
 {
