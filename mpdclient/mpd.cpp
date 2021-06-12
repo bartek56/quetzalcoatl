@@ -30,6 +30,16 @@ bool mpdclient::mpd::clear_error() noexcept
     return mpd_connection_clear_error(m_connection);
 }
 
+bool mpdclient::mpd::send_clear() noexcept
+{
+    return mpd_send_clear(m_connection);
+}
+
+bool mpdclient::mpd::send_add(const char *file) noexcept
+{
+    return mpd_send_add(m_connection, file);
+}
+
 std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta() noexcept
 {
     // Precondition: m_connection is not null

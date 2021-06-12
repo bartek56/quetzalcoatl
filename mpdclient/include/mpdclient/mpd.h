@@ -54,6 +54,8 @@ public:
     virtual std::vector<std::string> recv_tags(mpd_tag_type) noexcept;
     virtual bool run_play_id(unsigned) noexcept;
     virtual int run_add_id(const char *) noexcept;
+    virtual bool send_clear() noexcept;
+    virtual bool send_add(const char *) noexcept;
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
