@@ -60,6 +60,7 @@ public:
     virtual bool run_rename(const char *, const char *) noexcept;
     virtual bool run_save(const char *) noexcept;
     virtual bool run_rm(const char *) noexcept;
+    virtual bool run_stop() noexcept;
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;

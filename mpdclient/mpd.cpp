@@ -60,6 +60,11 @@ bool mpdclient::mpd::run_rm(const char *name) noexcept
     return mpd_run_rm(m_connection, name);
 }
 
+bool mpdclient::mpd::run_stop() noexcept
+{
+    return mpd_run_stop(m_connection);
+}
+
 std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta() noexcept
 {
     // Precondition: m_connection is not null
