@@ -5,6 +5,11 @@ const char *mpdclient::song::get_tag(mpd_tag_type type, unsigned idx) noexcept
     return mpd_song_get_tag(m_song, type, idx);
 }
 
+unsigned mpdclient::song::get_id() noexcept
+{
+    return mpd_song_get_id(m_song);
+}
+
 mpdclient::song::operator bool() const
 {
     return m_song;
