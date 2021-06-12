@@ -40,6 +40,11 @@ bool mpdclient::mpd::send_add(const char *file) noexcept
     return mpd_send_add(m_connection, file);
 }
 
+bool mpdclient::mpd::send_play_pos(unsigned song_pos) noexcept
+{
+    return mpd_send_play_pos(m_connection, song_pos);
+}
+
 std::vector<std::unique_ptr<mpdclient::song>> mpdclient::mpd::list_queue_meta() noexcept
 {
     // Precondition: m_connection is not null

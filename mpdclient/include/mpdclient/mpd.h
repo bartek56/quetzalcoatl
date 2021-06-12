@@ -56,6 +56,7 @@ public:
     virtual int run_add_id(const char *) noexcept;
     virtual bool send_clear() noexcept;
     virtual bool send_add(const char *) noexcept;
+    virtual bool send_play_pos(unsigned) noexcept;
 
     mpd(const mpd &) = delete;
     mpd &operator=(const mpd &) = delete;
