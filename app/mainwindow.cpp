@@ -25,8 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("Quetzalcoatl"));
-
     onPaletteChanged();
+
+    QIcon::setThemeSearchPaths(QStringList() << "/usr/share/icons");
+    QIcon::setThemeName("breeze");
 
     setWindowIcon(QIcon::fromTheme(IconNames::Player));
 
