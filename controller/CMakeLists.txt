@@ -1,4 +1,4 @@
-add_library(controller SHARED
+add_library(controller STATIC
   albumitem.cpp
   albumsitem.cpp
   artistalbumitem.cpp
