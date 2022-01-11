@@ -29,6 +29,7 @@ private:
     QVector<QAction *> m_connectedActions;
 
     QSlider *m_slider;
+    QSlider *v_slider;
 
     ConnectionDialog *m_connectionDialog;
 

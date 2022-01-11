@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     auto toolBar = addToolBar("ToolBar");
     toolBar->setMovable(false);
     toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    toolBar->setMinimumHeight(250);
+    toolBar->setIconSize(QSize(60, 60));
 
     m_connectionDialog = new ConnectionDialog(m_controller, this);
 
@@ -135,6 +137,17 @@ MainWindow::MainWindow(QWidget *parent)
                                                      [=]() { playbackSettingsDialog->exec(); });
     playbackSettingsAction->setEnabled(false);
     m_connectedActions.append(playbackSettingsAction);
+
+    // volume slider
+    v_slider = new QSlider(Qt::Horizontal);
+
+    v_slider->setTracking(false);
+    v_slider->setMinimumHeight(50);
+    v_slider->setRange(0, 100);
+    m_connectedWidgets.append(v_slider);
+    toolBar->addWidget(v_slider);
+
+    connect(v_slider, &QSlider::valueChanged, [=]() { m_controller->setVolume(v_slider->value()); });
 
     auto layout = new QVBoxLayout();
 
