@@ -28,6 +28,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(tr("Quetzalcoatl"));
 
+    // Include the system and bundled icon themes so embedded Linux deployments can use Breeze.
+    auto themeSearchPaths = QIcon::themeSearchPaths();
+    themeSearchPaths << "/usr/share/icons" << ":/icons";
+    QIcon::setThemeSearchPaths(themeSearchPaths);
+
     // On non-Linux system, we use the bundled Breeze icons. They need to change as the system switches between
     // Light and Dark mode.
     if (!iconsAreThere()) {
