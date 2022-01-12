@@ -5,11 +5,7 @@ add_executable(
   main.cpp
   mainwindow.cpp
   mainwindow.h
-  playlistdelegate.cpp
-  playlistvalidator.cpp
-  playbacksettingsdialog.cpp
-  resources.qrc
-  saveplaylistdialog.cpp)
+  resources.qrc)
 
 target_link_libraries(quetzalcoatl PRIVATE controller Qt::Widgets Qt::Gui
                                            PkgConfig::LIBMPDCLIENT)
