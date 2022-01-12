@@ -31,13 +31,10 @@ private:
     QSlider *m_slider;
     QSlider *v_slider;
 
-    ConnectionDialog *m_connectionDialog;
-
 private:
     void onPaletteChanged();
     int m_seekPosition{};
     Controller *m_controller{};
-    QAction *m_connectAction{};
 private slots:
     void setConnectionState(MPDConnection::State);
 };
