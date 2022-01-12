@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "connectiondialog.h"
 #include "databasemodel.h"
 #include "iconnames.h"
 #include "item.h"
@@ -53,13 +52,6 @@ MainWindow::MainWindow(QWidget *parent)
     toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
     toolBar->setMinimumHeight(250);
     toolBar->setIconSize(QSize(60, 60));
-
-    m_connectionDialog = new ConnectionDialog(m_controller, this);
-
-    m_connectAction = toolBar->addAction(QIcon::fromTheme(IconNames::Connect),
-                                         "Connect to MPD",
-                                         [=]() { m_connectionDialog->exec(); });
-    toolBar->addSeparator();
 
     auto stopAction = toolBar->addAction(QIcon::fromTheme(IconNames::Stop), "Stop");
     stopAction->setShortcut(Qt::Key::Key_MediaStop);
@@ -303,7 +295,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_controller, &Controller::errorMessage, [=](QString message) {
         QMessageBox::critical(this, "Critical error", message);
         setConnectionState(MPDConnection::State::Disconnected);
-        m_connectAction->setEnabled(false);
         timer->stop();
     });
 
@@ -331,9 +322,14 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     QSettings settings;
-    if (settings.contains("host") && settings.contains("port")) {
-        m_connectionDialog->connectToMPD();
+    if (!settings.contains("host") || !settings.contains("port")) {
+        settings.setValue("host", QVariant("localhost"));
+        settings.setValue("port", QVariant("6600"));
+        settings.sync();
     }
+    m_controller->connectToMPD(settings.value("host").toString(),
+                               settings.value("port").toInt(),
+                               200);
 }
 
 MainWindow::~MainWindow() {}
@@ -425,8 +421,6 @@ bool MainWindow::iconsAreThere()
 
 void MainWindow::setConnectionState(MPDConnection::State connectionState)
 {
-    m_connectionDialog->setConnectionState(connectionState);
-
     if (MPDConnection::State::Connected == connectionState) {
         for (auto widget : m_connectedWidgets) {
             widget->setEnabled(true);
@@ -436,10 +430,6 @@ void MainWindow::setConnectionState(MPDConnection::State connectionState)
             action->setEnabled(true);
         }
 
-        // Just a heads up that I've never tested this.
-        if (m_connectionDialog->isProtected()) {
-            m_controller->password(m_connectionDialog->password());
-        }
     } else {
         for (auto widget : m_connectedWidgets) {
             widget->setEnabled(false);
@@ -451,8 +441,6 @@ void MainWindow::setConnectionState(MPDConnection::State connectionState)
 
         statusBar()->clearMessage();
     }
-
-    m_connectAction->setEnabled(MPDConnection::State::Disconnected == connectionState);
 }
 
 void MainWindow::setIconTheme(Qt::ColorScheme colorScheme)

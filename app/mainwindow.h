@@ -7,7 +7,6 @@
 #include <QMainWindow>
 #include <QVector>
 
-class ConnectionDialog;
 class Controller;
 
 class QAction;
@@ -29,13 +28,10 @@ private:
     QSlider *m_slider;
     QSlider *v_slider;
 
-    ConnectionDialog *m_connectionDialog;
-
 private:
     static bool iconsAreThere();
     int m_seekPosition{};
     Controller *m_controller{};
-    QAction *m_connectAction{};
 
 private slots:
     void setConnectionState(MPDConnection::State);
