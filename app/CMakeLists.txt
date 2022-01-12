@@ -4,11 +4,7 @@ add_executable(quetzalcoatl
   main.cpp
   mainwindow.cpp
   mainwindow.h
-  playlistdelegate.cpp
-  playlistvalidator.cpp
-  playbacksettingsdialog.cpp
   resources.qrc
-  saveplaylistdialog.cpp
 )
 
 

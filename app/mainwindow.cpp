@@ -2,11 +2,7 @@
 #include "databasemodel.h"
 #include "iconnames.h"
 #include "item.h"
-#include "playbacksettingsdialog.h"
-#include "playlistdelegate.h"
-#include "playlistvalidator.h"
 #include "queuemodel.h"
-#include "saveplaylistdialog.h"
 
 #include <QLabel>
 #include <QMenu>
@@ -87,57 +83,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     toolBar->addSeparator();
 
-    auto deleteAction = toolBar->addAction(QIcon::fromTheme(IconNames::Remove),
-                                           "[DEL]ete selected songs from the queue.");
-    deleteAction->setEnabled(false);
-
-    auto playlistValidator = new PlaylistValidator(this);
-    connect(m_controller,
-            &Controller::playlistNames,
-            playlistValidator,
-            &PlaylistValidator::setPlaylists);
-
-    deleteAction->setShortcut(QKeySequence::Delete);
-    auto savePlaylistDialog = new SavePlaylistDialog(playlistValidator, this);
-    savePlaylistDialog->setEnabled(false);
-    m_connectedWidgets.append(savePlaylistDialog);
-
-    auto savePlaylistAction = toolBar->addAction(QIcon::fromTheme(IconNames::SaveAll),
-                                                 "[CTRL-S]ave queue to playlist",
-                                                 [=]() {
-                                                     savePlaylistDialog->clear();
-                                                     savePlaylistDialog->exec();
-                                                 });
-
-    savePlaylistAction->setShortcut(QKeySequence("CTRL+S"));
-    savePlaylistAction->setEnabled(false);
-    m_connectedActions.append(savePlaylistAction);
-
-    connect(savePlaylistDialog, &SavePlaylistDialog::accepted, [=]() {
-        auto name = savePlaylistDialog->name();
-        if (!name.isEmpty()) {
-            m_controller->savePlaylist(name);
-        }
-        savePlaylistDialog->clear();
-    });
-
-    toolBar->addSeparator();
-
-    auto playbackSettingsDialog = new PlaybackSettingsDialog(m_controller, this);
-    m_connectedWidgets.append(playbackSettingsDialog);
-    playbackSettingsDialog->setEnabled(false);
-    auto playbackSettingsAction = toolBar->addAction(QIcon::fromTheme(IconNames::Configure),
-                                                     "Playback Settings",
-                                                     [=]() { playbackSettingsDialog->exec(); });
-    playbackSettingsAction->setEnabled(false);
-    m_connectedActions.append(playbackSettingsAction);
-
     // volume slider
     v_slider = new QSlider(Qt::Horizontal);
 
     v_slider->setTracking(false);
     v_slider->setMinimumHeight(50);
     v_slider->setRange(0, 100);
+    v_slider->setMaximumWidth(250);
     m_connectedWidgets.append(v_slider);
     toolBar->addWidget(v_slider);
 
@@ -183,8 +135,6 @@ MainWindow::MainWindow(QWidget *parent)
     databaseView->setDragEnabled(true);
     databaseView->setUniformRowHeights(true);
 
-    auto playlistDelegate = new PlaylistDelegate(playlistValidator, this);
-    databaseView->setItemDelegate(playlistDelegate);
     m_connectedWidgets.append(databaseView);
     splitter->addWidget(databaseView);
 
@@ -238,25 +188,12 @@ MainWindow::MainWindow(QWidget *parent)
     queueView->setEnabled(false);
     queueView->setUniformRowHeights(true);
 
-    connect(deleteAction, &QAction::triggered, [=]() {
-        queueModel->deleteIndexes(queueView->selectionModel()->selectedIndexes());
-    });
-
     // This needs to be done after setting the model.
     // https://stackoverflow.com/a/30793898/240515
     connect(queueView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
             queueModel,
             &QueueModel::onSelectionChanged);
-
-    connect(queueView->selectionModel(),
-            &QItemSelectionModel::selectionChanged,
-            [=](const QItemSelection &selected, const QItemSelection &deselected) {
-                deleteAction->setEnabled(selected.count());
-            });
-
-    connect(queueModel, &QueueModel::hasSongs, savePlaylistAction, &QAction::setEnabled);
-    connect(queueModel, &QueueModel::hasSongs, savePlaylistDialog, &SavePlaylistDialog::setEnabled);
 
     connect(queueModel, &QueueModel::songIndex, queueView, [=](const QModelIndex &index) {
         queueView->scrollTo(index);
@@ -292,21 +229,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_controller, &Controller::repeating, repeatAction, &QAction::setChecked);
     connect(m_controller, &Controller::shuffled, randomAction, &QAction::setChecked);
-    connect(m_controller,
-            &Controller::volume,
-            playbackSettingsDialog,
-            &PlaybackSettingsDialog::setVolume);
-    connect(m_controller,
-            &Controller::crossfade,
-            playbackSettingsDialog,
-            &PlaybackSettingsDialog::setCrossfade);
-
-    connect(playbackSettingsDialog, &PlaybackSettingsDialog::accepted, [=]() {
-        m_controller->setCrossfade(playbackSettingsDialog->crossfade());
-        if (playbackSettingsDialog->hasVolume()) {
-            m_controller->setVolume(playbackSettingsDialog->volume());
-        }
-    });
 
     QSettings settings;
     if (!settings.contains("host") || !settings.contains("port")) {
