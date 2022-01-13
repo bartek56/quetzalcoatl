@@ -31,6 +31,7 @@ public:
     static QLatin1String Harddisk;
     static QLatin1String Sound;
     static QLatin1String OpticalAudio;
+    static QLatin1String Close;
 };
 
 #endif
