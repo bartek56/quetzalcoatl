@@ -23,3 +23,4 @@ QLatin1String IconNames::Database{"server-database"};
 QLatin1String IconNames::Harddisk{"drive-harddisk"};
 QLatin1String IconNames::Sound{"folder-sound"};
 QLatin1String IconNames::OpticalAudio{"media-optical-audio"};
+QLatin1String IconNames::Close{"window-close-symbolic"};

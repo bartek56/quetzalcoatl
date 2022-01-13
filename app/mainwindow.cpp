@@ -4,6 +4,7 @@
 #include "item.h"
 #include "queuemodel.h"
 
+#include <QDebug>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
@@ -94,6 +95,12 @@ MainWindow::MainWindow(QWidget *parent)
     toolBar->addWidget(v_slider);
 
     connect(v_slider, &QSlider::valueChanged, [=]() { m_controller->setVolume(v_slider->value()); });
+    toolBar->addSeparator();
+
+    // close button
+    auto closeAction = toolBar->addAction(QIcon::fromTheme(IconNames::Close), "Close");
+
+    connect(closeAction, &QAction::triggered, [=]() { qDebug() << "close"; });
 
     auto layout = new QVBoxLayout();
 
