@@ -5,10 +5,11 @@
 #include "queuemodel.h"
 
 #include <QApplication>
-#include <QDebug>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
+#include <QProcess>
+#include <QProcess>
 #include <QSettings>
 #include <QSlider>
 #include <QSplitter>
@@ -113,8 +114,12 @@ MainWindow::MainWindow(QWidget *parent)
     // close button
     auto closeAction = toolBar->addAction(QIcon::fromTheme(IconNames::Close), "Close");
 
-    connect(closeAction, &QAction::triggered, [=]() { qDebug() << "close"; });
-
+    connect(closeAction, &QAction::triggered, [=]() {
+        QProcess appProcess;
+        appProcess.startDetached("systemctl",
+                                 QStringList() << "stop"
+                                               << "mpc_mediaserver.service");
+    });
     auto layout = new QVBoxLayout();
 
     // Is the slider being dragged?
