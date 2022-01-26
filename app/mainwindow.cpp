@@ -253,11 +253,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_controller, &Controller::shuffled, randomAction, &QAction::setChecked);
 
     QSettings settings;
-    //if (!settings.contains("host") || !settings.contains("port")) {
-    settings.setValue("host", QVariant("192.168.1.5"));
-    settings.setValue("port", QVariant("6600"));
-    settings.sync();
-    //}
+    if (!settings.contains("host") || !settings.contains("port")) {
+        settings.setValue("host", QVariant("192.168.1.5"));
+        settings.setValue("port", QVariant("6600"));
+        settings.sync();
+    }
     m_controller->connectToMPD(settings.value("host").toString(),
                                settings.value("port").toInt(),
                                200);
