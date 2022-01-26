@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSettings settings;
     if (!settings.contains("host") || !settings.contains("port")) {
-        settings.setValue("host", QVariant("192.168.1.5"));
+        settings.setValue("host", QVariant("localhost"));
         settings.setValue("port", QVariant("6600"));
         settings.sync();
     }
