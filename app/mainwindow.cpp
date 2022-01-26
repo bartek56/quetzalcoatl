@@ -72,13 +72,13 @@ MainWindow::MainWindow(QWidget *parent)
     auto randomAction = toolBar->addAction(QIcon::fromTheme(IconNames::Shuffle), "Random");
     randomAction->setCheckable(true);
     randomAction->setEnabled(false);
-    connect(randomAction, &QAction::toggled, m_controller, &Controller::random);
+    connect(randomAction, &QAction::triggered, m_controller, &Controller::random);
     m_connectedActions.append(randomAction);
 
     auto repeatAction = toolBar->addAction(QIcon::fromTheme(IconNames::Repeat), "Repeat");
     repeatAction->setCheckable(true);
     repeatAction->setEnabled(false);
-    connect(repeatAction, &QAction::toggled, m_controller, &Controller::repeat);
+    connect(repeatAction, &QAction::triggered, m_controller, &Controller::repeat);
 
     m_connectedActions.append(repeatAction);
 
@@ -94,7 +94,15 @@ MainWindow::MainWindow(QWidget *parent)
     m_connectedWidgets.append(v_slider);
     toolBar->addWidget(v_slider);
 
-    connect(v_slider, &QSlider::valueChanged, [=]() { m_controller->setVolume(v_slider->value()); });
+    connect(v_slider, &QSlider::valueChanged, [this]() {
+        if (actionVolume) {
+            m_controller->setVolume(v_slider->value());
+            actionVolume = false;
+        }
+    });
+
+    connect(v_slider, &QSlider::actionTriggered, [this]() { actionVolume = true; });
+
     toolBar->addSeparator();
 
     // close button
@@ -234,6 +242,14 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(m_controller, &Controller::repeating, repeatAction, &QAction::setChecked);
+
+    connect(m_controller, &Controller::volume, [this](const int &volume) {
+        if (tempVolume != volume) {
+            v_slider->setValue(volume);
+            tempVolume = volume;
+        }
+    });
+
     connect(m_controller, &Controller::shuffled, randomAction, &QAction::setChecked);
 
     QSettings settings;
@@ -281,7 +297,6 @@ void MainWindow::changeEvent(QEvent *event)
 void MainWindow::onPaletteChanged()
 {
 #ifndef Q_OS_LINUX
-
     constexpr int OSX_LIGHT_MODE = 236;
     constexpr int OSX_DARK_MODE = 50;
     constexpr int THRESHOLD = OSX_LIGHT_MODE / 2 - OSX_DARK_MODE / 2;
