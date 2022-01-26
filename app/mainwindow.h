@@ -12,7 +12,6 @@ class Controller;
 class QAction;
 class QSlider;
 class QWidget;
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -27,6 +26,8 @@ private:
 
     QSlider *m_slider;
     QSlider *v_slider;
+    bool actionVolume = false;
+    int tempVolume = 0;
 
 private:
     static bool iconsAreThere();
