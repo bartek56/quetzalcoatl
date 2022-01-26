@@ -100,12 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
     // close button
     auto closeAction = toolBar->addAction(QIcon::fromTheme(IconNames::Close), "Close");
 
-    connect(closeAction, &QAction::triggered, [=]() {
-        QProcess appProcess;
-        appProcess.startDetached("systemctl",
-                                 QStringList() << "stop"
-                                               << "mpc_mediaserver.service");
-    });
+    connect(closeAction, &QAction::triggered, [=]() { close(); });
     auto layout = new QVBoxLayout();
 
     // Is the slider being dragged?
@@ -242,11 +237,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_controller, &Controller::shuffled, randomAction, &QAction::setChecked);
 
     QSettings settings;
-    if (!settings.contains("host") || !settings.contains("port")) {
-        settings.setValue("host", QVariant("localhost"));
-        settings.setValue("port", QVariant("6600"));
-        settings.sync();
-    }
+    //if (!settings.contains("host") || !settings.contains("port")) {
+    settings.setValue("host", QVariant("192.168.1.5"));
+    settings.setValue("port", QVariant("6600"));
+    settings.sync();
+    //}
     m_controller->connectToMPD(settings.value("host").toString(),
                                settings.value("port").toInt(),
                                200);
