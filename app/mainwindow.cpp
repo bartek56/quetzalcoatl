@@ -8,7 +8,6 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
-#include <QProcess>
 #include <QSettings>
 #include <QSlider>
 #include <QSplitter>
@@ -285,6 +284,10 @@ bool MainWindow::iconsAreThere()
     }
 
     if (QIcon::fromTheme(IconNames::Connect).isNull()) {
+        return false;
+    }
+
+    if (QIcon::fromTheme(IconNames::Close).isNull()) {
         return false;
     }
 
