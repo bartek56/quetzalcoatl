@@ -5,6 +5,9 @@
 #include "queuemodel.h"
 
 #include <QApplication>
+#include <QAbstractItemView>
+#include <QFont>
+#include <QFontMetrics>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
@@ -17,6 +20,8 @@
 #include <QToolBar>
 #include <QTreeView>
 #include <QVBoxLayout>
+
+#include <memory>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -100,9 +105,24 @@ MainWindow::MainWindow(QWidget *parent)
     v_slider = new QSlider(Qt::Horizontal);
 
     v_slider->setTracking(false);
-    v_slider->setMinimumHeight(50);
+    v_slider->setMinimumHeight(70);
     v_slider->setRange(0, 100);
-    v_slider->setMaximumWidth(250);
+    v_slider->setMinimumWidth(220);
+    v_slider->setMaximumWidth(300);
+    v_slider->setStyleSheet(R"(
+        QSlider::groove:horizontal {
+            height: 14px;
+            border-radius: 7px;
+            background: palette(mid);
+        }
+        QSlider::handle:horizontal {
+            width: 28px;
+            margin: -8px 0;
+            border-radius: 14px;
+            background: palette(button);
+            border: 1px solid palette(dark);
+        }
+    )");
     m_connectedWidgets.append(v_slider);
     toolBar->addWidget(v_slider);
 
@@ -153,9 +173,73 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto databaseModel = new DatabaseModel(m_controller);
     auto databaseView = new QTreeView();
+    auto playlistFont = databaseView->font();
+    playlistFont.setPointSizeF(playlistFont.pointSizeF() * 1.5);
+    databaseView->setFont(playlistFont);
     connect(databaseView, &QTreeView::doubleClicked, databaseModel, &ItemModel::onDoubleClicked);
     databaseView->setHeaderHidden(true);
     databaseView->setModel(databaseModel);
+    // Show the playlists directly, without the surrounding "Playlists" category.
+    databaseView->setRootIndex(databaseModel->index(0, 0));
+    databaseView->setRootIsDecorated(false);
+    databaseView->setItemsExpandable(false);
+    databaseView->setExpandsOnDoubleClick(false);
+    databaseView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    auto isPlaylistIndex = [](const QModelIndex &index) {
+        // Playlist items are direct children of the hidden Playlists category.
+        return index.isValid() && index.parent().isValid() && !index.parent().parent().isValid();
+    };
+
+    auto longPressTimer = new QTimer(databaseView);
+    longPressTimer->setSingleShot(true);
+    auto longPressPlaylist = std::make_shared<QString>();
+    connect(longPressTimer, &QTimer::timeout, [this, longPressPlaylist]() {
+        m_controller->replaceQueueWithPlaylist(*longPressPlaylist);
+    });
+
+    connect(databaseView, &QTreeView::pressed, [longPressTimer, longPressPlaylist, isPlaylistIndex](const QModelIndex &index) {
+        if (!isPlaylistIndex(index)) {
+            longPressTimer->stop();
+            return;
+        }
+
+        *longPressPlaylist = index.data().toString();
+        longPressTimer->start(600);
+    });
+    connect(databaseView, &QTreeView::clicked, [longPressTimer]() {
+        longPressTimer->stop();
+    });
+
+    connect(databaseView, &QTreeView::doubleClicked, [this, longPressTimer, isPlaylistIndex](const QModelIndex &index) {
+        if (!isPlaylistIndex(index)) {
+            return;
+        }
+
+        longPressTimer->stop();
+        m_controller->replaceQueueWithPlaylist(index.data().toString());
+    });
+
+    auto adjustPlaylistWidth = [databaseModel, databaseView]() {
+        const auto playlistsIndex = databaseModel->index(0, 0);
+        const QFontMetrics metrics(databaseView->font());
+        int longestName = 0;
+        for (int row = 0; row < databaseModel->rowCount(playlistsIndex); ++row) {
+            longestName = qMax(longestName,
+                               metrics.horizontalAdvance(databaseModel->index(row, 0, playlistsIndex).data().toString()));
+        }
+
+        const int width = qMax(120, longestName + 52);
+        databaseView->setFixedWidth(width);
+    };
+    connect(databaseModel, &QAbstractItemModel::rowsInserted, databaseView, [adjustPlaylistWidth]() {
+        QTimer::singleShot(0, adjustPlaylistWidth);
+    });
+    connect(databaseModel, &QAbstractItemModel::modelReset, databaseView, [adjustPlaylistWidth]() {
+        QTimer::singleShot(0, adjustPlaylistWidth);
+    });
+    QTimer::singleShot(0, adjustPlaylistWidth);
+
     databaseView->setEnabled(false);
     databaseView->setSelectionMode(QTreeView::ExtendedSelection);
     databaseView->setDragEnabled(true);
@@ -163,9 +247,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_connectedWidgets.append(databaseView);
     splitter->addWidget(databaseView);
+    splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
 
     // https://stackoverflow.com/a/22198672/240515
-    databaseView->setContextMenuPolicy(Qt::CustomContextMenu);
+    databaseView->setContextMenuPolicy(Qt::NoContextMenu);
     auto deletePlaylistAction = new QAction("Delete", this);
 
     // currentIndex does appear to be the right way to do it...
@@ -202,6 +288,9 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     auto queueView = new QTreeView();
+    auto songFont = queueView->font();
+    songFont.setPointSizeF(songFont.pointSizeF() * 1.25);
+    queueView->setFont(songFont);
 
     queueView->setAcceptDrops(true);
     queueView->setDropIndicatorShown(true);

@@ -300,6 +300,37 @@ QVector<mpd_entity *> Controller::listPlaylist(QString path)
     return songs;
 }
 
+void Controller::queuePlaylist(QString path)
+{
+    QVector<QString> uris;
+
+    for (auto entity : listPlaylist(path)) {
+        auto song = mpd_entity_get_song(entity);
+        if (song) {
+            uris.append(QString::fromUtf8(mpd_song_get_uri(song)));
+        }
+        mpd_entity_free(entity);
+    }
+
+    queueUris(uris, -1);
+}
+
+void Controller::replaceQueueWithPlaylist(QString path)
+{
+    QVector<QString> uris;
+
+    for (auto entity : listPlaylist(path)) {
+        auto song = mpd_entity_get_song(entity);
+        if (song) {
+            uris.append(QString::fromUtf8(mpd_song_get_uri(song)));
+        }
+        mpd_entity_free(entity);
+    }
+
+    // An empty target URI makes playAlbum replace the queue without starting playback.
+    playAlbum(uris, QString());
+}
+
 QVector<mpd_entity *> Controller::listSongs()
 {
     QVector<mpd_entity *> entities;

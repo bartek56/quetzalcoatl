@@ -37,6 +37,9 @@ public:
 
     QVector<mpd_entity *> listPlaylist(QString);
 
+    void queuePlaylist(QString);
+    void replaceQueueWithPlaylist(QString);
+
     QVector<mpd_entity *> listSongs();
 
     QVector<mpd_entity *> listDir(mpd_entity *);
