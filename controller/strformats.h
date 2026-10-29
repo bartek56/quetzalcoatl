@@ -9,6 +9,7 @@ QString timeStr(unsigned);
 QString leftPad(unsigned);
 
 QString songLabel(const mpd_song *);
+QString songArtistLabel(const mpd_song *);
 QString songEntityLabel(mpd_entity *);
 QString dirEntryLabel(mpd_entity *);
 

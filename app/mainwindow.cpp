@@ -6,27 +6,257 @@
 
 #include <QApplication>
 #include <QAbstractItemView>
+#include <QEvent>
+#include <QFrame>
 #include <QFont>
-#include <QFontMetrics>
+#include <QHeaderView>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QMouseEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QScroller>
+#include <QScrollArea>
+#include <QSizePolicy>
 #include <QSettings>
 #include <QSlider>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QStyleHints>
+#include <QTouchEvent>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolButton>
 #include <QTreeView>
 #include <QVBoxLayout>
 
 #include <memory>
 
+namespace
+{
+class TrackInfoCard : public QFrame
+{
+public:
+    explicit TrackInfoCard(QWidget *parent)
+        : QFrame(parent)
+    {
+        setObjectName("trackInfoCard");
+        setFrameShape(QFrame::StyledPanel);
+        setStyleSheet(R"(
+            QFrame#trackInfoCard {
+                background: palette(window);
+                color: palette(window-text);
+                border: 2px solid palette(mid);
+                border-radius: 16px;
+            }
+            QLabel#trackTitle {
+                font-size: 26px;
+                font-weight: bold;
+                border: none;
+            }
+            QLabel#trackArtist {
+                font-size: 20px;
+                color: palette(highlight);
+                border: none;
+            }
+            QLabel#trackDetails {
+                font-size: 17px;
+                border: none;
+            }
+            QPushButton {
+                font-size: 24px;
+                font-weight: bold;
+                min-width: 56px;
+                min-height: 56px;
+                border: 1px solid palette(mid);
+                border-radius: 12px;
+                background: palette(button);
+            }
+        )");
+
+        auto layout = new QVBoxLayout(this);
+        layout->setContentsMargins(20, 16, 20, 16);
+        layout->setSpacing(12);
+
+        auto heading = new QHBoxLayout();
+        auto titleLayout = new QVBoxLayout();
+        m_title = new QLabel(this);
+        m_title->setObjectName("trackTitle");
+        m_title->setWordWrap(true);
+        m_artist = new QLabel(this);
+        m_artist->setObjectName("trackArtist");
+        m_artist->setWordWrap(true);
+        titleLayout->addWidget(m_title);
+        titleLayout->addWidget(m_artist);
+
+        auto closeButton = new QPushButton(QString::fromUtf8("×"), this);
+        closeButton->setAccessibleName(tr("Close song information"));
+        closeButton->setToolTip(tr("Close"));
+        connect(closeButton, &QPushButton::clicked, this, &QWidget::hide);
+        heading->addLayout(titleLayout, 1);
+        heading->addWidget(closeButton, 0, Qt::AlignTop);
+        layout->addLayout(heading);
+
+        auto separator = new QFrame(this);
+        separator->setFrameShape(QFrame::HLine);
+        separator->setStyleSheet("color: palette(mid);");
+        layout->addWidget(separator);
+
+        auto detailsScroll = new QScrollArea(this);
+        detailsScroll->setWidgetResizable(true);
+        detailsScroll->setFrameShape(QFrame::NoFrame);
+        detailsScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_details = new QLabel(detailsScroll);
+        m_details->setObjectName("trackDetails");
+        m_details->setWordWrap(true);
+        m_details->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+        detailsScroll->setWidget(m_details);
+        layout->addWidget(detailsScroll, 1);
+
+        m_playButton = new QPushButton(tr("Play"), this);
+        m_playButton->setObjectName("playSongButton");
+        m_playButton->setIcon(QIcon::fromTheme(IconNames::Start));
+        m_playButton->setMinimumHeight(72);
+        m_playButton->setStyleSheet(R"(
+            QPushButton#playSongButton {
+                font-size: 24px;
+                font-weight: bold;
+                min-height: 72px;
+                border: 1px solid palette(highlight);
+                border-radius: 12px;
+                background: palette(highlight);
+                color: palette(highlighted-text);
+            }
+        )");
+        layout->addWidget(m_playButton);
+    }
+
+    void setTrackInfo(unsigned songId, const QString &title, const QString &artist, const QString &metadata)
+    {
+        m_songId = songId;
+        m_title->setText(title);
+        m_artist->setText(artist.isEmpty() ? tr("Unknown artist") : artist);
+
+        QStringList details;
+        const auto lines = metadata.split('\n', Qt::SkipEmptyParts);
+        for (const auto &line : lines) {
+            const auto separator = line.indexOf(": ");
+            if (separator < 0) {
+                continue;
+            }
+
+            const auto field = line.left(separator);
+            if (field == "Title" || field == "Artist" || field == "Album Artist") {
+                continue;
+            }
+
+            details.append(QStringLiteral("%1: %2").arg(field, line.mid(separator + 2)));
+        }
+        m_details->setText(details.join('\n'));
+    }
+
+    unsigned songId() const
+    {
+        return m_songId;
+    }
+
+    QPushButton *playButton() const
+    {
+        return m_playButton;
+    }
+
+private:
+    QLabel *m_title{};
+    QLabel *m_artist{};
+    QLabel *m_details{};
+    QPushButton *m_playButton{};
+    unsigned m_songId{};
+};
+
+class TrackInfoDismissFilter : public QObject
+{
+public:
+    TrackInfoDismissFilter(QWidget *card, QObject *parent)
+        : QObject(parent)
+        , m_card(card)
+    {}
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        Q_UNUSED(watched)
+        if (!m_card->isVisible()) {
+            return false;
+        }
+
+        QPoint globalPosition;
+        if (event->type() == QEvent::MouseButtonPress) {
+            globalPosition = static_cast<QMouseEvent *>(event)->globalPosition().toPoint();
+        } else if (event->type() == QEvent::TouchBegin) {
+            const auto points = static_cast<QTouchEvent *>(event)->points();
+            if (points.isEmpty()) {
+                return false;
+            }
+            globalPosition = points.first().globalPosition().toPoint();
+        } else {
+            return false;
+        }
+
+        const QRect cardRect(m_card->mapToGlobal(QPoint(0, 0)), m_card->size());
+        if (!cardRect.contains(globalPosition)) {
+            m_card->hide();
+        }
+        return false;
+    }
+
+private:
+    QWidget *m_card;
+};
+
+class QueueTreeView : public QTreeView
+{
+public:
+    using QTreeView::QTreeView;
+
+protected:
+    void resizeEvent(QResizeEvent *event) override
+    {
+        QTreeView::resizeEvent(event);
+        if (model() && header()->count() >= 2) {
+            header()->resizeSection(0, viewport()->width() / 3);
+        }
+    }
+
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        m_touchInput = event->source() != Qt::MouseEventNotSynthesized;
+        QTreeView::mousePressEvent(event);
+    }
+
+    void mouseMoveEvent(QMouseEvent *event) override
+    {
+        m_touchInput = event->source() != Qt::MouseEventNotSynthesized;
+        QTreeView::mouseMoveEvent(event);
+    }
+
+    void startDrag(Qt::DropActions supportedActions) override
+    {
+        if (!m_touchInput) {
+            QTreeView::startDrag(supportedActions);
+        }
+    }
+
+private:
+    bool m_touchInput = false;
+};
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("Quetzalcoatl"));
+    resize(800, 480);
 
     // Include the system and bundled icon themes so embedded Linux deployments can use Breeze.
     auto themeSearchPaths = QIcon::themeSearchPaths();
@@ -51,8 +281,8 @@ MainWindow::MainWindow(QWidget *parent)
     auto toolBar = addToolBar("ToolBar");
     toolBar->setMovable(false);
     toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolBar->setMinimumHeight(250);
-    toolBar->setIconSize(QSize(60, 60));
+    toolBar->setMinimumHeight(100);
+    toolBar->setIconSize(QSize(52, 52));
 
     auto stopAction = toolBar->addAction(QIcon::fromTheme(IconNames::Stop), "Stop");
     stopAction->setShortcut(Qt::Key::Key_MediaStop);
@@ -101,24 +331,37 @@ MainWindow::MainWindow(QWidget *parent)
 
     toolBar->addSeparator();
 
+    auto volumeDownButton = new QToolButton(toolBar);
+    volumeDownButton->setText("-");
+    volumeDownButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    volumeDownButton->setAccessibleName(tr("Decrease volume"));
+    volumeDownButton->setToolTip(tr("Decrease volume by 5%"));
+    auto volumeButtonFont = volumeDownButton->font();
+    volumeButtonFont.setPointSize(20);
+    volumeButtonFont.setBold(true);
+    volumeDownButton->setFont(volumeButtonFont);
+    volumeDownButton->setFixedSize(42, 54);
+    toolBar->addWidget(volumeDownButton);
+    m_connectedWidgets.append(volumeDownButton);
+
     // volume slider
     v_slider = new QSlider(Qt::Horizontal);
 
     v_slider->setTracking(false);
-    v_slider->setMinimumHeight(70);
+    v_slider->setMinimumHeight(48);
     v_slider->setRange(0, 100);
-    v_slider->setMinimumWidth(220);
-    v_slider->setMaximumWidth(300);
+    v_slider->setMinimumWidth(100);
+    v_slider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     v_slider->setStyleSheet(R"(
         QSlider::groove:horizontal {
-            height: 14px;
-            border-radius: 7px;
+            height: 10px;
+            border-radius: 5px;
             background: palette(mid);
         }
         QSlider::handle:horizontal {
-            width: 28px;
-            margin: -8px 0;
-            border-radius: 14px;
+            width: 22px;
+            margin: -7px 0;
+            border-radius: 11px;
             background: palette(button);
             border: 1px solid palette(dark);
         }
@@ -135,6 +378,26 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(v_slider, &QSlider::actionTriggered, [this]() { actionVolume = true; });
 
+    auto volumeUpButton = new QToolButton(toolBar);
+    volumeUpButton->setText("+");
+    volumeUpButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    volumeUpButton->setAccessibleName(tr("Increase volume"));
+    volumeUpButton->setToolTip(tr("Increase volume by 5%"));
+    volumeUpButton->setFont(volumeButtonFont);
+    volumeUpButton->setFixedSize(42, 54);
+    toolBar->addWidget(volumeUpButton);
+    m_connectedWidgets.append(volumeUpButton);
+
+    auto adjustVolume = [this](int change) {
+        const int volume = qBound(0, v_slider->value() + change, 100);
+        if (volume != v_slider->value()) {
+            v_slider->setValue(volume);
+            m_controller->setVolume(static_cast<unsigned>(volume));
+        }
+    };
+    connect(volumeDownButton, &QToolButton::clicked, this, [adjustVolume]() { adjustVolume(-5); });
+    connect(volumeUpButton, &QToolButton::clicked, this, [adjustVolume]() { adjustVolume(5); });
+
     toolBar->addSeparator();
 
     // close button
@@ -148,6 +411,25 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_slider = new QSlider(Qt::Horizontal);
     m_slider->setTracking(false);
+    m_slider->setMinimumHeight(44);
+    m_slider->setStyleSheet(R"(
+        QSlider::groove:horizontal {
+            height: 10px;
+            border-radius: 5px;
+            background: palette(mid);
+        }
+        QSlider::sub-page:horizontal {
+            border-radius: 5px;
+            background: palette(highlight);
+        }
+        QSlider::handle:horizontal {
+            width: 22px;
+            margin: -7px 0;
+            border-radius: 11px;
+            background: palette(button);
+            border: 1px solid palette(dark);
+        }
+    )");
 
     connect(m_controller, &Controller::sliderMax, [=](int value) {
         if (!m_slider->isSliderDown()) {
@@ -220,25 +502,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_controller->replaceQueueWithPlaylist(index.data().toString());
     });
 
-    auto adjustPlaylistWidth = [databaseModel, databaseView]() {
-        const auto playlistsIndex = databaseModel->index(0, 0);
-        const QFontMetrics metrics(databaseView->font());
-        int longestName = 0;
-        for (int row = 0; row < databaseModel->rowCount(playlistsIndex); ++row) {
-            longestName = qMax(longestName,
-                               metrics.horizontalAdvance(databaseModel->index(row, 0, playlistsIndex).data().toString()));
-        }
-
-        const int width = qMax(120, longestName + 52);
-        databaseView->setFixedWidth(width);
-    };
-    connect(databaseModel, &QAbstractItemModel::rowsInserted, databaseView, [adjustPlaylistWidth]() {
-        QTimer::singleShot(0, adjustPlaylistWidth);
-    });
-    connect(databaseModel, &QAbstractItemModel::modelReset, databaseView, [adjustPlaylistWidth]() {
-        QTimer::singleShot(0, adjustPlaylistWidth);
-    });
-    QTimer::singleShot(0, adjustPlaylistWidth);
+    databaseView->setFixedWidth(220);
 
     databaseView->setEnabled(false);
     databaseView->setSelectionMode(QTreeView::ExtendedSelection);
@@ -287,7 +551,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_controller->seek(queueModel->songId(), m_seekPosition);
     });
 
-    auto queueView = new QTreeView();
+    auto queueView = new QueueTreeView();
     auto songFont = queueView->font();
     songFont.setPointSizeF(songFont.pointSizeF() * 1.25);
     queueView->setFont(songFont);
@@ -295,10 +559,18 @@ MainWindow::MainWindow(QWidget *parent)
     queueView->setAcceptDrops(true);
     queueView->setDropIndicatorShown(true);
     queueView->setDragEnabled(true);
+    queueView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    queueView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    queueView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    queueView->viewport()->setAttribute(Qt::WA_AcceptTouchEvents);
+    QScroller::grabGesture(queueView->viewport(), QScroller::TouchGesture);
     queueView->setModel(queueModel);
+    auto queueHeader = queueView->header();
+    queueHeader->setSectionResizeMode(0, QHeaderView::Interactive);
+    queueHeader->setSectionResizeMode(1, QHeaderView::Stretch);
+    queueHeader->resizeSection(0, queueView->viewport()->width() / 3);
     queueView->setSelectionMode(QTreeView::ExtendedSelection);
     connect(queueView, &QTreeView::doubleClicked, queueModel, &ItemModel::onDoubleClicked);
-    connect(queueModel, &ItemModel::columnResized, queueView, &QTreeView::resizeColumnToContents);
     splitter->addWidget(queueView);
     queueView->setEnabled(false);
     queueView->setUniformRowHeights(true);
@@ -319,6 +591,32 @@ MainWindow::MainWindow(QWidget *parent)
     auto widget = new QWidget();
     widget->setLayout(layout);
     setCentralWidget(widget);
+
+    auto trackInfoCard = new TrackInfoCard(widget);
+    trackInfoCard->hide();
+    m_connectedWidgets.append(trackInfoCard->playButton());
+    connect(trackInfoCard->playButton(),
+            &QPushButton::clicked,
+            queueModel,
+            [queueModel, trackInfoCard]() {
+                queueModel->playSong(trackInfoCard->songId());
+                trackInfoCard->hide();
+            });
+    qApp->installEventFilter(new TrackInfoDismissFilter(trackInfoCard, qApp));
+    connect(queueView, &QTreeView::clicked, queueView, [queueView, widget, trackInfoCard](const QModelIndex &index) {
+        const auto artist = index.siblingAtColumn(0).data().toString();
+        const auto title = index.siblingAtColumn(1).data().toString();
+        const auto metadata = index.data(Qt::ToolTipRole).toString();
+        const auto songId = static_cast<Item *>(index.internalPointer())->id();
+        trackInfoCard->setTrackInfo(songId, title, artist, metadata);
+
+        const int width = qMin(560, widget->width() - 32);
+        const int height = qMin(380, widget->height() - 32);
+        trackInfoCard->resize(width, height);
+        trackInfoCard->move((widget->width() - width) / 2, (widget->height() - height) / 2);
+        trackInfoCard->raise();
+        trackInfoCard->show();
+    });
 
     auto status = statusBar();
     auto combinedTimeLabel = new QLabel();

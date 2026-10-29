@@ -26,6 +26,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
     void deleteIndexes(const QModelIndexList &);
+    void playSong(unsigned songId);
 
     int songId() const;
 

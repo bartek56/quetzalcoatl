@@ -45,6 +45,20 @@ QString songLabel(const mpd_song *song)
     return title;
 }
 
+QString songArtistLabel(const mpd_song *song)
+{
+    if (!song) {
+        return QString();
+    }
+
+    const char *artist = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+    if (!artist) {
+        artist = mpd_song_get_tag(song, MPD_TAG_ALBUM_ARTIST, 0);
+    }
+
+    return artist ? QString::fromUtf8(artist) : QString();
+}
+
 QString songEntityLabel(mpd_entity *entity)
 {
     if (!entity) {
