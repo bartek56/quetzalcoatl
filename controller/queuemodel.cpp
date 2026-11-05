@@ -13,7 +13,7 @@
 QueueModel::QueueModel(Controller *controller, QObject *parent)
     : ItemModel(controller, parent)
 {
-    setRootItem(new Item({"Artist", "Title"}, QIcon(), Qt::NoItemFlags, true, false));
+    setRootItem(new Item({"ID", "Artist", "Title"}, QIcon(), Qt::NoItemFlags, true, false));
 
     connect(controller, &Controller::queueChanged, this, &QueueModel::setQueue);
     connect(controller, &Controller::songId, this, &QueueModel::setSongId);
@@ -120,6 +120,14 @@ bool QueueModel::dropMimeData(
 
 QVariant QueueModel::data(const QModelIndex &index, int role) const
 {
+    if (Qt::DecorationRole == role) {
+        if (index.isValid() && index.column() == 1) {
+            return static_cast<Item *>(index.internalPointer())->icon();
+        }
+
+        return QVariant();
+    }
+
     if (Qt::FontRole == role) {
         if (m_songId != -1) {
             unsigned playingId = static_cast<unsigned>(m_songId);

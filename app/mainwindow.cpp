@@ -90,6 +90,12 @@ public:
         titleLayout->addWidget(m_title);
         titleLayout->addWidget(m_artist);
 
+        m_previousButton = new QPushButton(QString::fromUtf8("←"), this);
+        m_previousButton->setAccessibleName(tr("Previous song"));
+        m_previousButton->setToolTip(tr("Previous song"));
+        m_nextButton = new QPushButton(QString::fromUtf8("→"), this);
+        m_nextButton->setAccessibleName(tr("Next song"));
+        m_nextButton->setToolTip(tr("Next song"));
         auto closeButton = new QPushButton(QString::fromUtf8("×"), this);
         closeButton->setAccessibleName(tr("Close song information"));
         closeButton->setToolTip(tr("Close"));
@@ -129,14 +135,27 @@ public:
                 color: palette(highlighted-text);
             }
         )");
-        layout->addWidget(m_playButton);
+        auto playbackControls = new QHBoxLayout();
+        playbackControls->addWidget(m_previousButton);
+        playbackControls->addWidget(m_playButton, 1);
+        playbackControls->addWidget(m_nextButton);
+        layout->addLayout(playbackControls);
     }
 
-    void setTrackInfo(unsigned songId, const QString &title, const QString &artist, const QString &metadata)
+    void setTrackInfo(int row,
+                      unsigned songId,
+                      const QString &title,
+                      const QString &artist,
+                      const QString &metadata,
+                      bool hasPrevious,
+                      bool hasNext)
     {
+        m_row = row;
         m_songId = songId;
         m_title->setText(title);
         m_artist->setText(artist.isEmpty() ? tr("Unknown artist") : artist);
+        m_previousButton->setEnabled(hasPrevious);
+        m_nextButton->setEnabled(hasNext);
 
         QStringList details;
         const auto lines = metadata.split('\n', Qt::SkipEmptyParts);
@@ -161,9 +180,24 @@ public:
         return m_songId;
     }
 
+    int row() const
+    {
+        return m_row;
+    }
+
     QPushButton *playButton() const
     {
         return m_playButton;
+    }
+
+    QPushButton *previousButton() const
+    {
+        return m_previousButton;
+    }
+
+    QPushButton *nextButton() const
+    {
+        return m_nextButton;
     }
 
 private:
@@ -171,7 +205,10 @@ private:
     QLabel *m_artist{};
     QLabel *m_details{};
     QPushButton *m_playButton{};
+    QPushButton *m_previousButton{};
+    QPushButton *m_nextButton{};
     unsigned m_songId{};
+    int m_row{-1};
 };
 
 class TrackInfoDismissFilter : public QObject
@@ -219,12 +256,17 @@ class QueueTreeView : public QTreeView
 public:
     using QTreeView::QTreeView;
 
+    int trackNumberColumnWidth() const
+    {
+        return fontMetrics().horizontalAdvance("999") + 10;
+    }
+
 protected:
     void resizeEvent(QResizeEvent *event) override
     {
         QTreeView::resizeEvent(event);
         if (model() && header()->count() >= 2) {
-            header()->resizeSection(0, viewport()->width() / 3);
+            header()->resizeSection(0, trackNumberColumnWidth());
         }
     }
 
@@ -456,7 +498,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto databaseModel = new DatabaseModel(m_controller);
     auto databaseView = new QTreeView();
     auto playlistFont = databaseView->font();
-    playlistFont.setPointSizeF(playlistFont.pointSizeF() * 1.5);
+    playlistFont.setPointSizeF(playlistFont.pointSizeF() * 1.2);
     databaseView->setFont(playlistFont);
     connect(databaseView, &QTreeView::doubleClicked, databaseModel, &ItemModel::onDoubleClicked);
     databaseView->setHeaderHidden(true);
@@ -502,7 +544,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_controller->replaceQueueWithPlaylist(index.data().toString());
     });
 
-    databaseView->setFixedWidth(220);
+    databaseView->setFixedWidth(147);
 
     databaseView->setEnabled(false);
     databaseView->setSelectionMode(QTreeView::ExtendedSelection);
@@ -552,10 +594,9 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     auto queueView = new QueueTreeView();
-    auto songFont = queueView->font();
-    songFont.setPointSizeF(songFont.pointSizeF() * 1.25);
-    queueView->setFont(songFont);
-
+    queueView->setRootIsDecorated(false);
+    queueView->setIndentation(0);
+    queueView->setStyleSheet("QTreeView::item { padding-left: 0px; }");
     queueView->setAcceptDrops(true);
     queueView->setDropIndicatorShown(true);
     queueView->setDragEnabled(true);
@@ -566,9 +607,14 @@ MainWindow::MainWindow(QWidget *parent)
     QScroller::grabGesture(queueView->viewport(), QScroller::TouchGesture);
     queueView->setModel(queueModel);
     auto queueHeader = queueView->header();
-    queueHeader->setSectionResizeMode(0, QHeaderView::Interactive);
-    queueHeader->setSectionResizeMode(1, QHeaderView::Stretch);
-    queueHeader->resizeSection(0, queueView->viewport()->width() / 3);
+    queueHeader->setSectionResizeMode(0, QHeaderView::Fixed);
+    queueHeader->setSectionResizeMode(1, QHeaderView::Interactive);
+    queueHeader->setSectionResizeMode(2, QHeaderView::Stretch);
+    auto queueHeaderFont = queueHeader->font();
+    queueHeaderFont.setPointSizeF(queueHeaderFont.pointSizeF() * 0.8);
+    queueHeader->setFont(queueHeaderFont);
+    queueHeader->resizeSection(0, queueView->trackNumberColumnWidth());
+    queueHeader->resizeSection(1, queueView->viewport()->width() / 3);
     queueView->setSelectionMode(QTreeView::ExtendedSelection);
     connect(queueView, &QTreeView::doubleClicked, queueModel, &ItemModel::onDoubleClicked);
     splitter->addWidget(queueView);
@@ -603,20 +649,41 @@ MainWindow::MainWindow(QWidget *parent)
                 trackInfoCard->hide();
             });
     qApp->installEventFilter(new TrackInfoDismissFilter(trackInfoCard, qApp));
-    connect(queueView, &QTreeView::clicked, queueView, [queueView, widget, trackInfoCard](const QModelIndex &index) {
-        const auto artist = index.siblingAtColumn(0).data().toString();
-        const auto title = index.siblingAtColumn(1).data().toString();
+    auto showTrackInfo = [queueModel, widget, trackInfoCard](int row) {
+        if (row < 0 || row >= queueModel->rowCount()) {
+            return;
+        }
+
+        const auto index = queueModel->index(row, 0);
+        const auto artist = index.siblingAtColumn(1).data().toString();
+        const auto title = index.siblingAtColumn(2).data().toString();
         const auto metadata = index.data(Qt::ToolTipRole).toString();
         const auto songId = static_cast<Item *>(index.internalPointer())->id();
-        trackInfoCard->setTrackInfo(songId, title, artist, metadata);
-
+        trackInfoCard->setTrackInfo(row,
+                                    songId,
+                                    title,
+                                    artist,
+                                    metadata,
+                                    row > 0,
+                                    row + 1 < queueModel->rowCount());
         const int width = qMin(560, widget->width() - 32);
         const int height = qMin(380, widget->height() - 32);
         trackInfoCard->resize(width, height);
         trackInfoCard->move((widget->width() - width) / 2, (widget->height() - height) / 2);
         trackInfoCard->raise();
         trackInfoCard->show();
+    };
+    connect(queueView, &QTreeView::clicked, queueView, [showTrackInfo](const QModelIndex &index) {
+        showTrackInfo(index.row());
     });
+    connect(trackInfoCard->previousButton(),
+            &QPushButton::clicked,
+            queueView,
+            [trackInfoCard, showTrackInfo]() { showTrackInfo(trackInfoCard->row() - 1); });
+    connect(trackInfoCard->nextButton(),
+            &QPushButton::clicked,
+            queueView,
+            [trackInfoCard, showTrackInfo]() { showTrackInfo(trackInfoCard->row() + 1); });
 
     auto status = statusBar();
     auto combinedTimeLabel = new QLabel();
@@ -652,11 +719,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_controller, &Controller::shuffled, randomAction, &QAction::setChecked);
 
     QSettings settings;
-    if (!settings.contains("host") || !settings.contains("port")) {
-        settings.setValue("host", QVariant("localhost"));
+    //if (!settings.contains("host") || !settings.contains("port")) {
+        settings.setValue("host", QVariant("192.168.1.5"));
         settings.setValue("port", QVariant("6600"));
         settings.sync();
-    }
+    //}
     m_controller->connectToMPD(settings.value("host").toString(),
                                settings.value("port").toInt(),
                                200);

@@ -510,7 +510,8 @@ void Controller::pollForStatus()
         while ((entity = mpd_recv_entity(m_connection)) != nullptr) {
             if (mpd_entity_get_type(entity) == MPD_ENTITY_TYPE_SONG) {
                 auto song = mpd_entity_get_song(entity);
-                queue.append(new QueuedItem({songArtistLabel(song),
+                queue.append(new QueuedItem({songTrackNumberLabel(song),
+                                             songArtistLabel(song),
                                              songLabel(song)},
                                             entity,
                                             songToolTip(song)));
